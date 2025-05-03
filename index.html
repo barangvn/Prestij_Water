@@ -1189,10 +1189,6 @@
 
 </body>
 </html>
-<button id="testButton">Test Verisi Yaz</button>
-<div id="testDataDisplay">Veri bekleniyor...</div>
-const dbRef = firebase.database().ref(); // Veya db = getDatabase(); ref() vs. yeni SDK kullanıyorsanız
-
 const testButton = document.getElementById('testButton');
 const testDataDisplay = document.getElementById('testDataDisplay');
 const testPath = 'testNode/simpleTest'; // Basit bir veritabanı yolu
@@ -1222,4 +1218,3 @@ dbRef.child(testPath).on('value', (snapshot) => {
   console.error("Test verisi okuma hatası:", error);
   testDataDisplay.textContent = "Veri okunamadı!";
 });
-
