@@ -9,1173 +9,361 @@
     <script>
         // Firebase yapılandırması (KENDİ BİLGİLERİNİZLE DEĞİŞTİRİN)
         const firebaseConfig = {
-            apiKey: "AIzaSyAmW3qdlm49cvfVeP27DaAMGJwtKDJ6kyI",
-            authDomain: "prestij-water.firebaseapp.com",
-            databaseURL: "https://prestij-water-default-rtdb.firebaseio.com",
-            projectId: "prestij-water",
-            storageBucket: "prestij-water.firebasestorage.app",
-            messagingSenderId: "712467125722",
-            appId: "1:712467125722:web:e845679e5d456fda2f5ce3",
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
         };
 
         // Firebase'i başlat
         const app = firebase.initializeApp(firebaseConfig);
         const db = app.database();
-    </script> type="module"
+    </script>
     
 </head>
 <body>
-  <!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Su Arıtma Takip Sistemi</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f3f4f6;
-        }
-        /* Custom scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
+    
+    <div class="p-4 md:p-8">
 
-        /* Button transitions */
-        button, input[type="submit"], select, input[type="search"] {
-            transition: all 0.2s ease; /* Smoother transitions */
-        }
-        button:active, input[type="submit"]:active { transform: scale(0.98); }
+        <h1 class="text-3xl font-bold mb-8 text-center text-gray-800">Su Arıtma Takip Sistemi</h1>
 
-        /* Modal base styles */
-        .modal {
-            display: none; position: fixed; z-index: 1000;
-            left: 0; top: 0; width: 100%; height: 100%;
-            overflow: auto; background-color: rgba(0,0,0,0.5); /* Darker overlay */
-            padding-top: 60px; /* Space from top */
-        }
-        .modal-content {
-            background-color: #fefefe; margin: auto; padding: 25px;
-            border: 1px solid #e5e7eb; width: 90%; max-width: 750px; /* Slightly wider */
-            border-radius: 8px; position: relative;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-        }
-        .modal-close-button { /* Renamed for clarity */
-            color: #9ca3af; position: absolute; top: 15px; right: 20px;
-            font-size: 28px; font-weight: bold; cursor: pointer;
-            line-height: 1;
-        }
-        .modal-close-button:hover, .modal-close-button:focus { color: #1f2937; }
-
-        /* Table styles */
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 0.875rem; vertical-align: middle; /* Align vertically */ }
-        th { background-color: #f9fafb; font-weight: 600; color: #4b5563; }
-        tbody tr:hover { background-color: #f9fafb; }
-
-        /* Low stock warning */
-        .low-stock-warning { background-color: #fef3c7; color: #92400e; font-weight: 500; }
-
-        /* Input focus styles */
-        input:focus, textarea:focus, select:focus {
-            outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-        }
-        /* Style for multi-select */
-        select[multiple] {
-             height: auto; /* Adjust height based on content */
-             min-height: 80px; /* Minimum height */
-             background-color: white;
-        }
-        select[multiple] option {
-            padding: 5px;
-        }
-        /* Style for search input */
-        input[type="search"] {
-            appearance: none; /* Remove default search icon */
-            padding-right: 2.5rem; /* Space for custom icon */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%239ca3af'%3E%3Cpath fill-rule='evenodd' d='M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z' clip-rule='evenodd' /%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 0.75rem center;
-            background-size: 1rem 1rem;
-        }
-
-    </style>
-</head>
-<body class="p-4 md:p-8">
-
-    <h1 class="text-3xl font-bold mb-8 text-center text-gray-800">Su Arıtma Takip Sistemi</h1>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-        <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-700 border-b pb-2">Müşteri Yönetimi</h2>
-
-            <div class="mb-4">
-                <label for="musteri-arama" class="sr-only">Müşteri Ara</label> <input type="search" id="musteri-arama" placeholder="Müşteri Adı veya Telefon No Ara..." class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500">
-            </div>
-
-            <button id="yeni-musteri-goster-btn" class="mb-4 w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                + Yeni Müşteri Ekle
-            </button>
-            <form id="musteri-form" class="space-y-4 mb-6 hidden"> <h3 class="text-lg font-medium text-gray-600">Yeni Müşteri Bilgileri</h3>
-                <div>
-                    <label for="musteri-ad" class="block text-sm font-medium text-gray-700">Ad Soyad</label>
-                    <input type="text" id="musteri-ad" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700 border-b pb-2">Müşteri Yönetimi</h2>
+                <div class="mb-4">
+                    <label for="musteri-arama" class="sr-only">Müşteri Ara</label>
+                    <input type="search" id="musteri-arama" placeholder="Müşteri Adı veya Telefon No Ara..."
+                           class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500">
                 </div>
-                <div>
-                    <label for="musteri-tel" class="block text-sm font-medium text-gray-700">Telefon Numarası *</label>
-                    <input type="tel" id="musteri-tel" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" placeholder="örn: 5xxxxxxxxx">
-                </div>
-                <div>
-                    <label for="musteri-adres" class="block text-sm font-medium text-gray-700">Adres</label>
-                    <textarea id="musteri-adres" rows="2" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"></textarea>
-                </div>
-                 <div>
-                    <label for="musteri-cihaz" class="block text-sm font-medium text-gray-700">Kullanılan Cihaz Adı</label>
-                    <input type="text" id="musteri-cihaz" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" placeholder="örn: Model XYZ Ters Ozmoz">
-                </div>
-                 <div>
-                    <label for="musteri-teknisyen" class="block text-sm font-medium text-gray-700">Varsayılan Teknisyen</label>
-                    <input type="text" id="musteri-teknisyen" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" placeholder="örn: Ahmet Yılmaz">
-                </div>
-                <div class="flex justify-end space-x-2">
-                     <button type="button" id="yeni-musteri-iptal-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        İptal
-                    </button>
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Müşteriyi Kaydet
-                    </button>
-                </div>
-            </form>
-
-             <h3 class="text-lg font-medium text-gray-600 mb-2 mt-4">Mevcut Müşteriler</h3>
-            <div class="table-container flex-grow border rounded-md overflow-hidden">
-                 <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-100 sticky top-0">
-                        <tr>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ad Soyad</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Telefon</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody id="musteri-listesi" class="bg-white divide-y divide-gray-200">
-                        <tr><td colspan="3" class="text-center py-10 text-gray-500">Henüz müşteri eklenmemiş veya arama sonucu bulunamadı.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-700 border-b pb-2">Stok Yönetimi</h2>
-
-             <button id="yeni-urun-goster-btn" class="mb-4 w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                + Yeni Ürün Ekle
-            </button>
-            <form id="stok-form" class="space-y-4 mb-6 hidden"> <h3 class="text-lg font-medium text-gray-600">Yeni Ürün Bilgileri</h3>
-                <div>
-                    <label for="urun-ad" class="block text-sm font-medium text-gray-700">Ürün Adı</label>
-                    <input type="text" id="urun-ad" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" placeholder="örn: 5 Mikron Sediment Filtre">
-                </div>
-                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label for="stok-miktar" class="block text-sm font-medium text-gray-700">Stok Miktarı</label>
-                        <input type="number" id="stok-miktar" required min="0" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
-                    </div>
-                    <div>
-                        <label for="min-stok" class="block text-sm font-medium text-gray-700">Min. Stok Seviyesi</label>
-                        <input type="number" id="min-stok" required min="0" value="0" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
-                    </div>
-                 </div>
-                 <div class="flex justify-end space-x-2">
-                     <button type="button" id="yeni-urun-iptal-btn" class="py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        İptal
-                    </button>
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
-                        Ürünü Stoklara Ekle
-                    </button>
-                 </div>
-            </form>
-
-            <h3 class="text-lg font-medium text-gray-600 mb-2 mt-4">Stok Durumu</h3>
-             <div class="table-container flex-grow border rounded-md overflow-hidden">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-100 sticky top-0">
-                        <tr>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ürün Adı</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Miktar</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Min. Stok</th>
-                            <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stok-listesi" class="bg-white divide-y divide-gray-200">
-                        <tr><td colspan="4" class="text-center py-10 text-gray-500">Henüz ürün eklenmemiş.</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div id="musteriDetayModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close-button" onclick="kapatModal('musteriDetayModal')">&times;</span>
-
-            <h3 class="text-xl font-semibold mb-4 text-gray-800" id="modal-musteri-ad"></h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700 mb-6 pb-4 border-b">
-                <p><strong>Telefon:</strong> <span id="modal-musteri-tel"></span></p>
-                <p><strong>Kullanılan Cihaz:</strong> <span id="modal-musteri-cihaz"></span></p>
-                <p class="md:col-span-2"><strong>Adres:</strong> <span id="modal-musteri-adres"></span></p>
-                <p><strong>Varsayılan Teknisyen:</strong> <span id="modal-musteri-teknisyen"></span></p>
-            </div>
-
-            <div class="mb-6 p-4 border rounded-md bg-gray-50">
-                 <h4 class="text-lg font-semibold mb-3 text-gray-700">Yeni Servis Kaydı Ekle</h4>
-                 <form id="servis-kaydi-form" class="space-y-3">
-                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                         <div>
-                             <label for="servis-tarih" class="block text-sm font-medium text-gray-700">İşlem Tarihi *</label>
-                             <input type="date" id="servis-tarih" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
-                         </div>
-                         <div>
-                             <label for="servis-islem-turu" class="block text-sm font-medium text-gray-700">İşlem Türü *</label>
-                             <select id="servis-islem-turu" required class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm sm:text-sm">
-                                 <option value="">Seçiniz...</option>
-                                 <option value="Bakım">Bakım</option>
-                                 <option value="Arıza">Arıza</option>
-                                 <option value="Montaj">Montaj</option>
-                                 <option value="Montaj-2">Montaj-2</option>
-                                 <option value="Diğer">Diğer</option>
-                             </select>
-                         </div>
-                     </div>
-                     <div>
-                         <label for="servis-teknisyen" class="block text-sm font-medium text-gray-700">İlgilenen Teknisyen</label>
-                         <input type="text" id="servis-teknisyen" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" placeholder="Varsayılan teknisyen kullanılacaksa boş bırakın">
-                     </div>
-                     <div>
-                         <label for="servis-kullanilan-urunler" class="block text-sm font-medium text-gray-700">Yapılan Değişim / Kullanılan Ürünler (Stoktan Düşer)</label>
-                         <select id="servis-kullanilan-urunler" multiple class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                             </select>
-                         <p class="text-xs text-gray-500 mt-1">Birden fazla seçmek için Ctrl (Windows) veya Cmd (Mac) tuşunu basılı tutun.</p>
-                     </div>
-                     <div>
-                         <label for="servis-ek-notlar" class="block text-sm font-medium text-gray-700">Ek Notlar / Açıklama</label>
-                         <textarea id="servis-ek-notlar" rows="2" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" placeholder="İşlemle ilgili ek notlar..."></textarea>
-                     </div>
-                      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div>
-                             <label for="servis-sonraki-bakim" class="block text-sm font-medium text-gray-700">Sonraki Bakım Periyodu</label>
-                             <select id="servis-sonraki-bakim" class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm sm:text-sm">
-                                 <option value="0">Yok</option>
-                                 <option value="3">3 Ay Sonra</option>
-                                 <option value="6">6 Ay Sonra</option>
-                                 <option value="9">9 Ay Sonra</option>
-                                 <option value="12">12 Ay Sonra</option>
-                                 <option value="24">24 Ay Sonra</option>
-                                 <option value="36">36 Ay Sonra</option>
-                             </select>
-                          </div>
-                          <div>
-                              <label for="servis-erteleme-notu" class="block text-sm font-medium text-gray-700">Erteleme Notu</label>
-                              <input type="text" id="servis-erteleme-notu" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm" placeholder="Örn: Müşteri şehir dışında">
-                          </div>
-                      </div>
-                     <button type="submit" class="w-full sm:w-auto inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Servis Kaydını Ekle
-                    </button>
-                 </form>
-             </div>
-
-            <div class="mt-6">
-                 <h4 class="text-lg font-semibold mb-3 text-gray-700">Servis Geçmişi</h4>
-                 <div class="table-container max-h-60 overflow-y-auto border rounded-md">
-                     <table class="min-w-full divide-y divide-gray-200">
-                         <thead class="bg-gray-100 sticky top-0">
-                             <tr>
-                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tarih</th>
-                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tür</th>
-                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kullanılan Ürünler</th>
-                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Teknisyen</th>
-                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sonraki Bakım</th>
-                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Erteleme Notu</th>
-                                 <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İşlemler</th>
-                             </tr>
-                         </thead>
-                         <tbody id="modal-servis-listesi" class="bg-white divide-y divide-gray-200">
-                             <tr><td colspan="7" class="text-center py-10 text-gray-500">Bu müşteri için servis kaydı bulunmamaktadır.</td></tr>
-                         </tbody>
-                     </table>
-                 </div>
-            </div>
-
-             <div class="mt-6 pt-4 border-t flex justify-end">
-                 <button onclick="musteriSil()" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-                    Müşteriyi Sil
+                <button id="yeni-musteri-goster-btn"
+                        class="mb-4 w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    + Yeni Müşteri Ekle
                 </button>
-             </div>
+                <form id="musteri-form" class="space-y-4 mb-6 hidden">
+                    <h3 class="text-lg font-medium text-gray-600">Yeni Müşteri Bilgileri</h3>
+                    <div>
+                        <label for="musteri-ad" class="block text-sm font-medium text-gray-700">Ad Soyad</label>
+                        <input type="text" id="musteri-ad" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="musteri-tel" class="block text-sm font-medium text-gray-700">Telefon Numarası *</label>
+                        <input type="tel" id="musteri-tel" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                               placeholder="örn: 5xxxxxxxxx">
+                    </div>
+                    <div>
+                        <label for="musteri-adres" class="block text-sm font-medium text-gray-700">Adres</label>
+                        <textarea id="musteri-adres" rows="2" required
+                                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"></textarea>
+                    </div>
+                    <div>
+                        <label for="musteri-cihaz" class="block text-sm font-medium text-gray-700">Kullanılan Cihaz Adı</label>
+                        <input type="text" id="musteri-cihaz" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                               placeholder="örn: Model XYZ Ters Ozmoz">
+                    </div>
+                    <div>
+                        <label for="musteri-teknisyen" class="block text-sm font-medium text-gray-700">Varsayılan Teknisyen</label>
+                        <input type="text" id="musteri-teknisyen" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                               placeholder="örn: Ahmet Yılmaz">
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" id="yeni-musteri-iptal-btn"
+                                class="py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            İptal
+                        </button>
+                        <button type="submit"
+                                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            Müşteriyi Kaydet
+                        </button>
+                    </div>
+                </form>
+                <h3 class="text-lg font-medium text-gray-600 mb-2 mt-4">Mevcut Müşteriler</h3>
+                <div class="table-container flex-grow border rounded-md overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100 sticky top-0">
+                        <tr>
+                            <th scope="col"
+                                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Ad Soyad
+                            </th>
+                            <th scope="col"
+                                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Telefon
+                            </th>
+                            <th scope="col"
+                                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                İşlemler
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody id="musteri-listesi" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="3" class="text-center py-10 text-gray-500">
+                                Henüz müşteri eklenmemiş veya arama sonucu bulunamadı.
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-700 border-b pb-2">Stok Yönetimi</h2>
+                <button id="yeni-urun-goster-btn"
+                        class="mb-4 w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                    + Yeni Ürün Ekle
+                </button>
+                <form id="stok-form" class="space-y-4 mb-6 hidden">
+                    <h3 class="text-lg font-medium text-gray-600">Yeni Ürün Bilgileri</h3>
+                    <div>
+                        <label for="urun-ad" class="block text-sm font-medium text-gray-700">Ürün Adı</label>
+                        <input type="text" id="urun-ad" required
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                               placeholder="örn: 5 Mikron Sediment Filtre">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="stok-miktar" class="block text-sm font-medium text-gray-700">Stok Miktarı</label>
+                            <input type="number" id="stok-miktar" required min="0"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="min-stok" class="block text-sm font-medium text-gray-700">Min. Stok Seviyesi</label>
+                            <input type="number" id="min-stok" required min="0" value="0"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-2">
+                        <button type="button" id="yeni-urun-iptal-btn"
+                                class="py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            İptal
+                        </button>
+                        <button type="submit"
+                                class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                            Ürünü Stoklara Ekle
+                        </button>
+                    </div>
+                </form>
+                <h3 class="text-lg font-medium text-gray-600 mb-2 mt-4">Stok Durumu</h3>
+                <div class="table-container flex-grow border rounded-md overflow-hidden">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100 sticky top-0">
+                        <tr>
+                            <th scope="col"
+                                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Ürün Adı
+                            </th>
+                            <th scope="col"
+                                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Miktar
+                            </th>
+                            <th scope="col"
+                                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Min. Stok
+                            </th>
+                            <th scope="col"
+                                class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                İşlemler
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody id="stok-listesi" class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td colspan="4" class="text-center py-10 text-gray-500">Henüz ürün eklenmemiş.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <div id="servisDuzenleModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close-button" onclick="kapatModal('servisDuzenleModal')">&times;</span>
-            <h3 class="text-xl font-semibold mb-4 text-gray-800">Servis Kaydını Düzenle</h3>
+        <div id="musteriDetayModal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close-button" onclick="kapatModal('musteriDetayModal')">&times;</span>
+                <h3 class="text-xl font-semibold mb-4 text-gray-800" id="modal-musteri-ad"></h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-3 text-sm text-gray-700 mb-6 pb-4 border-b">
+                    <p><strong>Telefon:</strong> <span id="modal-musteri-tel"></span></p>
+                    <p><strong>Kullanılan Cihaz:</strong> <span id="modal-musteri-cihaz"></span></p>
+                    <p class="md:col-span-2"><strong>Adres:</strong> <span id="modal-musteri-adres"></span></p>
+                    <p><strong>Varsayılan Teknisyen:</strong> <span id="modal-musteri-teknisyen"></span></p>
+                </div>
 
-            <form id="servis-duzenle-form" class="space-y-3">
-                <input type="hidden" id="edit-musteri-index">
-                <input type="hidden" id="edit-kayit-index">
-                <input type="hidden" id="edit-kayit-id"> <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="edit-servis-tarih" class="block text-sm font-medium text-gray-700">İşlem Tarihi *</label>
-                        <input type="date" id="edit-servis-tarih" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                <div class="mb-6 p-4 border rounded-md bg-gray-50">
+                    <h4 class="text-lg font-semibold mb-3 text-gray-700">Yeni Servis Kaydı Ekle</h4>
+                    <form id="servis-kaydi-form" class="space-y-3">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="servis-tarih" class="block text-sm font-medium text-gray-700">İşlem Tarihi *</label>
+                                <input type="date" id="servis-tarih" required
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                            </div>
+                            <div>
+                                <label for="servis-islem-turu" class="block text-sm font-medium text-gray-700">İşlem
+                                    Türü *</label>
+                                <select id="servis-islem-turu" required
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm sm:text-sm">
+                                    <option value="">Seçiniz...</option>
+                                    <option value="Bakım">Bakım</option>
+                                    <option value="Arıza">Arıza</option>
+                                    <option value="Montaj">Montaj</option>
+                                    <option value="Montaj-2">Montaj-2</option>
+                                    <option value="Diğer">Diğer</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="servis-teknisyen" class="block text-sm font-medium text-gray-700">İlgilenen
+                                Teknisyen</label>
+                            <input type="text" id="servis-teknisyen"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                                   placeholder="Varsayılan teknisyen kullanılacaksa boş bırakın">
+                        </div>
+                        <div>
+                            <label for="servis-kullanilan-urunler" class="block text-sm font-medium text-gray-700">Yapılan
+                                Değişim / Kullanılan Ürünler (Stoktan Düşer)</label>
+                            <select id="servis-kullanilan-urunler" multiple
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </select>
+                            <p class="text-xs text-gray-500 mt-1">
+                                Birden fazla seçmek için Ctrl (Windows) veya Cmd (Mac) tuşunu basılı tutun.
+                            </p>
+                        </div>
+                        <div>
+                            <label for="servis-ek-notlar" class="block text-sm font-medium text-gray-700">Ek Notlar /
+                                Açıklama</label>
+                            <textarea id="servis-ek-notlar" rows="2"
+                                      class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                                      placeholder="İşlemle ilgili ek notlar..."></textarea>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label for="servis-sonraki-bakim" class="block text-sm font-medium text-gray-700">Sonraki
+                                    Bakım Periyodu</label>
+                                <select id="servis-sonraki-bakim"
+                                        class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm sm:text-sm">
+                                    <option value="0">Yok</option>
+                                    <option value="3">3 Ay Sonra</option>
+                                    <option value="6">6 Ay Sonra</option>
+                                    <option value="9">9 Ay Sonra</option>
+                                    <option value="12">12 Ay Sonra</option>
+                                    <option value="24">24 Ay Sonra</option>
+                                    <option value="36">36 Ay Sonra</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="servis-erteleme-notu" class="block text-sm font-medium text-gray-700">Erteleme
+                                    Notu</label>
+                                <input type="text" id="servis-erteleme-notu"
+                                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"
+                                       placeholder="Örn: Müşteri şehir dışında">
+                            </div>
+                        </div>
+                        <button type="submit"
+                                class="w-full sm:w-auto inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            Servis Kaydını Ekle
+                        </button>
+                    </form>
+                </div>
+                <div class="mt-6">
+                    <h4 class="text-lg font-semibold mb-3 text-gray-700">Servis Geçmişi</h4>
+                    <div class="table-container max-h-60 overflow-y-auto border rounded-md">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-100 sticky top-0">
+                            <tr>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tarih
+                                </th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Tür
+                                </th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Kullanılan Ürünler
+                                </th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Teknisyen
+                                </th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Sonraki Bakım
+                                </th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Erteleme Notu
+                                </th>
+                                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    İşlemler
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody id="modal-servis-listesi" class="bg-white divide-y divide-gray-200">
+                            <tr>
+                                <td colspan="7" class="text-center py-10 text-gray-500">
+                                    Bu müşteri için servis kaydı bulunmamaktadır.
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div>
-                        <label for="edit-servis-islem-turu" class="block text-sm font-medium text-gray-700">İşlem Türü *</label>
-                        <select id="edit-servis-islem-turu" required class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm sm:text-sm">
-                            <option value="">Seçiniz...</option>
-                            <option value="Bakım">Bakım</option>
-                            <option value="Arıza">Arıza</option>
-                            <option value="Montaj">Montaj</option>
-                            <option value="Montaj-2">Montaj-2</option>
-                            <option value="Diğer">Diğer</option>
-                        </select>
-                    </div>
                 </div>
-                <div>
-                    <label for="edit-servis-teknisyen" class="block text-sm font-medium text-gray-700">İlgilenen Teknisyen</label>
-                    <input type="text" id="edit-servis-teknisyen" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
-                </div>
-                <div>
-                    <label for="edit-servis-kullanilan-urunler" class="block text-sm font-medium text-gray-700">Yapılan Değişim / Kullanılan Ürünler (Stoktan Düşer)</label>
-                    <select id="edit-servis-kullanilan-urunler" multiple class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500">
-                        </select>
-                     <p class="text-xs text-gray-500 mt-1">Birden fazla seçmek için Ctrl (Windows) veya Cmd (Mac) tuşunu basılı tutun.</p>
-                </div>
-                 <div>
-                    <label for="edit-servis-ek-notlar" class="block text-sm font-medium text-gray-700">Ek Notlar / Açıklama</label>
-                    <textarea id="edit-servis-ek-notlar" rows="2" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm"></textarea>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label for="edit-servis-sonraki-bakim" class="block text-sm font-medium text-gray-700">Sonraki Bakım Periyodu</label>
-                        <select id="edit-servis-sonraki-bakim" class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm sm:text-sm">
-                            <option value="0">Yok</option>
-                            <option value="3">3 Ay Sonra</option>
-                            <option value="6">6 Ay Sonra</option>
-                            <option value="9">9 Ay Sonra</option>
-                            <option value="12">12 Ay Sonra</option>
-                            <option value="24">24 Ay Sonra</option>
-                            <option value="36">36 Ay Sonra</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="edit-servis-erteleme-notu" class="block text-sm font-medium text-gray-700">Erteleme Notu</label>
-                        <input type="text" id="edit-servis-erteleme-notu" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
-                    </div>
-                </div>
-                <div class="flex justify-end space-x-2 mt-6 pt-4 border-t">
-                     <button type="button" onclick="kapatModal('servisDuzenleModal')" class="py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        İptal
+                <div class="mt-6 pt-4 border-t flex justify-end">
+                    <button onclick="musteriSil()"
+                            class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        Müşteriyi Sil
                     </button>
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
-                        Değişiklikleri Kaydet
-                    </button>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
 
-
-    <script>
-        // --- DOM Elements ---
-        const musteriForm = document.getElementById('musteri-form');
-        const musteriListesi = document.getElementById('musteri-listesi');
-        const musteriAramaInput = document.getElementById('musteri-arama');
-        const yeniMusteriGosterBtn = document.getElementById('yeni-musteri-goster-btn');
-        const yeniMusteriIptalBtn = document.getElementById('yeni-musteri-iptal-btn');
-
-        const stokForm = document.getElementById('stok-form');
-        const stokListesi = document.getElementById('stok-listesi');
-        const yeniUrunGosterBtn = document.getElementById('yeni-urun-goster-btn');
-        const yeniUrunIptalBtn = document.getElementById('yeni-urun-iptal-btn');
-
-
-        const musteriDetayModal = document.getElementById('musteriDetayModal');
-        const servisKaydiForm = document.getElementById('servis-kaydi-form');
-        const modalServisListesi = document.getElementById('modal-servis-listesi');
-        const servisKullanilanUrunlerSelect = document.getElementById('servis-kullanilan-urunler');
-
-        const servisDuzenleModal = document.getElementById('servisDuzenleModal');
-        const servisDuzenleForm = document.getElementById('servis-duzenle-form');
-        const editServisKullanilanUrunlerSelect = document.getElementById('edit-servis-kullanilan-urunler');
-
-
-        let mevcutMusteriIndex = null;
-        let originalServiceRecordProducts = []; // To store products before editing
-
-        // --- Data Storage (localStorage) ---
-        let musteriler = []; // Initialize as empty, load in DOMContentLoaded
-        let stoklar = []; // Initialize as empty, load in DOMContentLoaded
-
-        // --- Utility Functions ---
-        function formatDate(date) {
-             if (!date) return '';
-            // Handles both Date objects and ISO strings
-            const d = (date instanceof Date) ? date : new Date(date);
-            if (isNaN(d.getTime())) return ''; // Invalid date check
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-        function addMonths(date, months) {
-             if (!date || months <= 0) return null;
-            const d = new Date(date);
-             if (isNaN(d.getTime())) return null; // Invalid date check
-            d.setMonth(d.getMonth() + months);
-            return d;
-        }
-
-        // --- Data Persistence Functions ---
-        function musterileriKaydet() {
-             try {
-                 localStorage.setItem('musteriler_v3', JSON.stringify(musteriler));
-             } catch (error) {
-                 console.error("Error saving musteriler to localStorage:", error);
-                 alert("Müşteri verileri kaydedilirken bir hata oluştu. Tarayıcı depolama alanı dolu olabilir.");
-             }
-        }
-        function stoklariKaydet() {
-             try {
-                localStorage.setItem('stoklar_v3', JSON.stringify(stoklar));
-                // After saving stock, re-populate product dropdowns in case modals are open
-                stokUrunleriniDoldur(servisKullanilanUrunlerSelect);
-                stokUrunleriniDoldur(editServisKullanilanUrunlerSelect);
-             } catch (error) {
-                 console.error("Error saving stoklar to localStorage:", error);
-                 alert("Stok verileri kaydedilirken bir hata oluştu. Tarayıcı depolama alanı dolu olabilir.");
-             }
-        }
-
-        // --- Rendering Functions ---
-
-        // Render Customer List (with search filter)
-        function musterileriGoster(searchTerm = '') {
-            musteriListesi.innerHTML = '';
-            const lowerSearchTerm = searchTerm.toLowerCase().trim();
-
-            // Filter only valid customers
-            const validMusteriler = musteriler.filter(musteri => musteri && musteri.id && musteri.ad && musteri.tel);
-
-            const filteredMusteriler = validMusteriler.filter(musteri => {
-                return musteri.ad.toLowerCase().includes(lowerSearchTerm) ||
-                       musteri.tel.includes(searchTerm);
-            });
-
-
-            if (filteredMusteriler.length === 0) {
-                 musteriListesi.innerHTML = `<tr><td colspan="3" class="text-center py-10 text-gray-500">Henüz müşteri eklenmemiş ${searchTerm ? 'veya arama sonucu bulunamadı' : ''}.</td></tr>`;
-                 return;
-            }
-
-            filteredMusteriler.forEach(musteri => {
-                // Find the original index in the main musteriler array (which might contain invalid entries)
-                const originalIndex = musteriler.findIndex(m => m && m.id === musteri.id);
-                if (originalIndex === -1) {
-                     console.warn("[musterileriGoster] Could not find original index for customer:", musteri);
-                     return; // Skip if index not found (shouldn't happen with validMusteriler filter)
-                 }
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">${musteri.ad}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${musteri.tel}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                        <button onclick="musteriDetayGoster(${originalIndex})" class="text-indigo-600 hover:text-indigo-900 mr-2">Detay/Servis</button>
-                    </td>
-                `;
-                musteriListesi.appendChild(tr);
-            });
-        }
-
-        // Render Stock List
-        function stoklariGoster() {
-             stokListesi.innerHTML = '';
-             // Filter only valid stock items
-             const validStoklar = stoklar.filter(urun => urun && urun.id && typeof urun.miktar === 'number' && typeof urun.minStok === 'number');
-
-             if (validStoklar.length === 0) {
-                 stokListesi.innerHTML = '<tr><td colspan="4" class="text-center py-10 text-gray-500">Henüz ürün eklenmemiş.</td></tr>';
-                 return;
-            }
-            validStoklar.forEach(urun => {
-                 // Find original index
-                 const index = stoklar.findIndex(s => s && s.id === urun.id);
-                 if (index === -1) return; // Skip if somehow not found
-
-                const tr = document.createElement('tr');
-                const isLowStock = urun.miktar <= urun.minStok;
-                tr.className = isLowStock ? 'low-stock-warning' : '';
-
-                tr.innerHTML = `
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium ${isLowStock ? '' : 'text-gray-900'}">${urun.ad || 'N/A'} ${isLowStock ? '<span class="text-xs font-bold">(Düşük Stok!)</span>': ''}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm ${isLowStock ? '' : 'text-gray-500'}">${urun.miktar}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm ${isLowStock ? '' : 'text-gray-500'}">${urun.minStok}</td>
-                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium">
-                        <input type="number" value="${urun.miktar}" min="0" class="w-16 px-2 py-1 border border-gray-300 rounded-md text-sm mr-2 focus:ring-green-500 focus:border-green-500" onchange="stokGuncelle(${index}, this.value)">
-                        <button onclick="stokSil(${index})" class="text-red-600 hover:text-red-900">Sil</button>
-                    </td>
-                `;
-                stokListesi.appendChild(tr);
-            });
-        }
-
-        // Render Service History in Modal
-        function servisGecmisiniGoster(musteriIndex) {
-             // --- Validation ---
-             if (typeof musteriIndex !== 'number' || musteriIndex < 0 || musteriIndex >= musteriler.length || !musteriler[musteriIndex]) {
-                 console.error("[servisGecmisiniGoster] Invalid musteriIndex or customer data.", musteriIndex);
-                 modalServisListesi.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-red-500">Müşteri verisi yüklenirken hata oluştu.</td></tr>';
-                 return;
-             }
-            const musteri = musteriler[musteriIndex];
-            modalServisListesi.innerHTML = '';
-
-            // Ensure servisKayitlari is an array
-            const servisKayitlariDizisi = (musteri.servisKayitlari && Array.isArray(musteri.servisKayitlari)) ? musteri.servisKayitlari : [];
-
-            if (servisKayitlariDizisi.length === 0) {
-                modalServisListesi.innerHTML = '<tr><td colspan="7" class="text-center py-10 text-gray-500">Bu müşteri için servis kaydı bulunmamaktadır.</td></tr>';
-                return;
-            }
-
-             // Filter out invalid records
-             const validKayitlar = servisKayitlariDizisi.filter(kayit => kayit && typeof kayit === 'object' && kayit.id);
-             if(validKayitlar.length !== servisKayitlariDizisi.length){
-                 console.warn("[servisGecmisiniGoster] Some invalid service records were filtered out for customer:", musteri.ad);
-             }
-
-            const sortedKayitlar = [...validKayitlar].sort((a, b) => {
-                 const dateA = a.tarih ? new Date(a.tarih) : null;
-                 const dateB = b.tarih ? new Date(b.tarih) : null;
-                 if (dateA && dateB) return dateB - dateA;
-                 if (dateA) return -1;
-                 if (dateB) return 1;
-                 return 0;
-            });
-
-            // --- Rendering Loop ---
-            sortedKayitlar.forEach(kayit => {
-                // Find index in the *original* servisKayitlariDizisi array
-                const originalIndex = servisKayitlariDizisi.findIndex(k => k && k.id === kayit.id);
-                if (originalIndex === -1) {
-                    console.warn("[servisGecmisiniGoster] Could not find original index for service record:", kayit);
-                    return; // Skip rendering if index not found
-                }
-
-                // --- Logging for Debugging ---
-                console.log(`[servisGecmisiniGoster] Rendering button for musteriIndex: ${musteriIndex}, originalIndex: ${originalIndex}, kayitId: ${kayit.id}`);
-
-                const tr = document.createElement('tr');
-                const sonrakiBakimStr = kayit.sonrakiBakimTarihi ? formatDate(kayit.sonrakiBakimTarihi) : 'Yok';
-                const isSonrakiBakimGecmis = kayit.sonrakiBakimTarihi && new Date(kayit.sonrakiBakimTarihi) < new Date();
-
-                const kullanilanUrunlerStr = (kayit.kullanilanUrunler && Array.isArray(kayit.kullanilanUrunler) && kayit.kullanilanUrunler.length > 0)
-                    ? kayit.kullanilanUrunler.map(u => u ? `${u.urunAdi || '?'} (${u.adet || '?'})` : '?').join(', ')
-                    : '-';
-
-                tr.innerHTML = `
-                    <td class="px-3 py-2 whitespace-nowrap">${formatDate(kayit.tarih)}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${kayit.islemTuru || '?'}</td>
-                    <td class="px-3 py-2 text-sm text-gray-600">${kullanilanUrunlerStr}</td>
-                    <td class="px-3 py-2 whitespace-nowrap">${kayit.teknisyen || '-'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap ${isSonrakiBakimGecmis ? 'text-red-600 font-bold' : ''}">${sonrakiBakimStr}</td>
-                    <td class="px-3 py-2 text-sm text-gray-600">${kayit.ertelemeNotu || '-'}</td>
-                    <td class="px-3 py-2 whitespace-nowrap text-sm font-medium">
-                        <button onclick="servisKaydiDuzenleGoster(${musteriIndex}, ${originalIndex})" class="text-teal-600 hover:text-teal-900 mr-2">Düzenle</button>
-                        <button onclick="servisKaydiSil(${musteriIndex}, ${originalIndex})" class="text-red-500 hover:text-red-700">Sil</button>
-                    </td>
-                `;
-                modalServisListesi.appendChild(tr);
-            });
-        }
-
-        // Populate stock items in a select element
-        function stokUrunleriniDoldur(selectElement) {
-            selectElement.innerHTML = '';
-             const validStoklar = stoklar.filter(urun => urun && urun.id && typeof urun.miktar === 'number');
-
-            if (validStoklar.length === 0) {
-                selectElement.innerHTML = '<option disabled>Stokta ürün bulunmuyor.</option>';
-                return;
-            }
-            validStoklar.forEach(urun => {
-                if (urun.miktar > 0) {
-                    const option = document.createElement('option');
-                    option.value = urun.id;
-                    option.textContent = `${urun.ad || '?'} (Stok: ${urun.miktar})`;
-                    selectElement.appendChild(option);
-                } else {
-                     const option = document.createElement('option');
-                     option.value = urun.id;
-                     option.textContent = `${urun.ad || '?'} (Stok Tükendi)`;
-                     option.disabled = true;
-                     selectElement.appendChild(option);
-                }
-            });
-        }
-
-        // --- Modal Functions ---
-
-        // Show Customer Details Modal
-        function musteriDetayGoster(index) {
-             if (typeof index !== 'number' || index < 0 || index >= musteriler.length || !musteriler[index]) {
-                 console.error("[musteriDetayGoster] Invalid index or customer data.", index);
-                 alert("Müşteri detayı gösterilirken bir hata oluştu.");
-                 return;
-             }
-            mevcutMusteriIndex = index; // Set the global index HERE
-            console.log("[musteriDetayGoster] Setting mevcutMusteriIndex to:", mevcutMusteriIndex); // DEBUG
-            const musteri = musteriler[index];
-            document.getElementById('modal-musteri-ad').textContent = musteri.ad || '';
-            document.getElementById('modal-musteri-tel').textContent = musteri.tel || '';
-            document.getElementById('modal-musteri-adres').textContent = musteri.adres || '';
-            document.getElementById('modal-musteri-cihaz').textContent = musteri.cihaz || '';
-            document.getElementById('modal-musteri-teknisyen').textContent = musteri.teknisyen || '';
-
-            document.getElementById('servis-teknisyen').value = '';
-            document.getElementById('servis-teknisyen').placeholder = `Varsayılan: ${musteri.teknisyen || 'Belirtilmemiş'}`;
-            document.getElementById('servis-tarih').value = formatDate(new Date());
-            servisKaydiForm.reset();
-
-            stokUrunleriniDoldur(servisKullanilanUrunlerSelect);
-            servisGecmisiniGoster(index); // Pass the correct index
-            musteriDetayModal.style.display = "block";
-        }
-
-        // Show Service Edit Modal
-        function servisKaydiDuzenleGoster(musteriIndex, kayitIndex) {
-             if (typeof musteriIndex !== 'number' || musteriIndex < 0 || musteriIndex >= musteriler.length || !musteriler[musteriIndex] ||
-                 typeof kayitIndex !== 'number' || kayitIndex < 0 || !musteriler[musteriIndex].servisKayitlari || !Array.isArray(musteriler[musteriIndex].servisKayitlari) || kayitIndex >= musteriler[musteriIndex].servisKayitlari.length || !musteriler[musteriIndex].servisKayitlari[kayitIndex]) {
-                 console.error("[servisKaydiDuzenleGoster] Invalid indices or data.", musteriIndex, kayitIndex);
-                 alert("Servis kaydı düzenleme formu yüklenirken bir hata oluştu.");
-                 return;
-             }
-            const musteri = musteriler[musteriIndex];
-            const kayit = musteri.servisKayitlari[kayitIndex];
-
-            document.getElementById('edit-musteri-index').value = musteriIndex;
-            document.getElementById('edit-kayit-index').value = kayitIndex;
-            document.getElementById('edit-kayit-id').value = kayit.id;
-            originalServiceRecordProducts = JSON.parse(JSON.stringify(kayit.kullanilanUrunler || []));
-
-            document.getElementById('edit-servis-tarih').value = formatDate(kayit.tarih);
-            document.getElementById('edit-servis-islem-turu').value = kayit.islemTuru || '';
-            document.getElementById('edit-servis-teknisyen').value = kayit.teknisyen || '';
-            document.getElementById('edit-servis-ek-notlar').value = kayit.ekNotlar || '';
-            document.getElementById('edit-servis-sonraki-bakim').value = kayit.sonrakiBakimPeriyodu || '0';
-            document.getElementById('edit-servis-erteleme-notu').value = kayit.ertelemeNotu || '';
-
-            stokUrunleriniDoldur(editServisKullanilanUrunlerSelect);
-            if (kayit.kullanilanUrunler && Array.isArray(kayit.kullanilanUrunler)) {
-                kayit.kullanilanUrunler.forEach(urun => {
-                     if (urun && urun.urunId) {
-                        const option = editServisKullanilanUrunlerSelect.querySelector(`option[value="${urun.urunId}"]`);
-                        if (option) {
-                            option.selected = true;
-                        }
-                     }
-                });
-            }
-
-            servisDuzenleModal.style.display = "block";
-        }
-
-
-        // Close Modal Function
-        function kapatModal(modalId) {
-            const modal = document.getElementById(modalId);
-            if(modal) {
-                modal.style.display = "none";
-            }
-             if (modalId === 'musteriDetayModal') {
-                 console.log("[kapatModal] Resetting mevcutMusteriIndex from:", mevcutMusteriIndex); // DEBUG
-                 mevcutMusteriIndex = null; // Reset index ONLY when closing customer detail
-                 console.log("[kapatModal] mevcutMusteriIndex is now:", mevcutMusteriIndex); // DEBUG
-             }
-             if (modalId === 'servisDuzenleModal') {
-                 originalServiceRecordProducts = [];
-                 servisDuzenleForm.reset();
-             }
-        }
-
-        // --- Action Functions ---
-
-        // Delete Customer
-        function musteriSil() {
-            console.log("[musteriSil] Attempting delete. mevcutMusteriIndex:", mevcutMusteriIndex); // DEBUG
-             if (mevcutMusteriIndex === null || typeof mevcutMusteriIndex !== 'number' || mevcutMusteriIndex < 0 || mevcutMusteriIndex >= musteriler.length || !musteriler[mevcutMusteriIndex]) {
-                 console.error("[musteriSil] Invalid or null mevcutMusteriIndex.", mevcutMusteriIndex);
-                 alert("Müşteri silinirken bir hata oluştu. Lütfen müşteri detaylarını tekrar açıp deneyin.");
-                 return;
-             }
-
-             const musteriAdi = musteriler[mevcutMusteriIndex].ad || 'Bu müşteri';
-
-             if (confirm(`'${musteriAdi}' isimli müşteriyi ve tüm servis kayıtlarını silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) {
-                try {
-                    console.log("[musteriSil] Splicing musteriler array at index:", mevcutMusteriIndex);
-                    musteriler.splice(mevcutMusteriIndex, 1);
-                    musterileriKaydet();
-                    console.log("[musteriSil] Musteriler saved.");
-                    musterileriGoster(musteriAramaInput.value);
-                    console.log("[musteriSil] Musteri list rerendered.");
-                    kapatModal('musteriDetayModal'); // Close the correct modal
-                    console.log("[musteriSil] Modal closed.");
-                } catch (error) {
-                     console.error("[musteriSil] Error during deletion:", error);
-                     alert("Müşteri silinirken beklenmedik bir hata oluştu.");
-                     musteriler = JSON.parse(localStorage.getItem('musteriler_v3')) || [];
-                     musterileriGoster();
-                }
-            } else {
-                 console.log("[musteriSil] Deletion cancelled by user.");
-            }
-        }
-
-         // Delete Service Record
-        function servisKaydiSil(musteriIndex, kayitIndex) {
-            console.log(`[servisKaydiSil] Called. musteriIndex: ${musteriIndex}, kayitIndex: ${kayitIndex}`); // DEBUG
-
-            // --- Rigorous Validation ---
-            if (typeof musteriIndex !== 'number' || musteriIndex < 0 || musteriIndex >= musteriler.length || !musteriler[musteriIndex]) {
-                 console.error("[servisKaydiSil] Invalid musteriIndex:", musteriIndex);
-                 alert("Servis kaydı silinirken hata: Geçersiz müşteri indeksi.");
-                 return;
-            }
-            if (!musteriler[musteriIndex].servisKayitlari || !Array.isArray(musteriler[musteriIndex].servisKayitlari)) {
-                 console.error("[servisKaydiSil] Customer has no valid servisKayitlari array. Customer:", musteriler[musteriIndex]);
-                 alert("Servis kaydı silinirken hata: Müşterinin servis kayıtları bulunamadı.");
-                 return;
-            }
-             if (typeof kayitIndex !== 'number' || kayitIndex < 0 || kayitIndex >= musteriler[musteriIndex].servisKayitlari.length || !musteriler[musteriIndex].servisKayitlari[kayitIndex]) {
-                 console.error("[servisKaydiSil] Invalid kayitIndex:", kayitIndex, "for array length:", musteriler[musteriIndex].servisKayitlari.length);
-                 alert("Servis kaydı silinirken hata: Geçersiz kayıt indeksi.");
-                 return;
-            }
-             // --- End Validation ---
-
-
-            if (confirm(`Bu servis kaydını silmek istediğinizden emin misiniz? Stok iadesi yapılmayacaktır!`)) {
-                 try {
-                     console.log("[servisKaydiSil] Splicing servisKayitlari at index:", kayitIndex);
-                     // Ensure we are splicing the correct array
-                     musteriler[musteriIndex].servisKayitlari.splice(kayitIndex, 1);
-                     console.log("[servisKaydiSil] servisKayitlari after splice:", musteriler[musteriIndex].servisKayitlari);
-                     musterileriKaydet();
-                     console.log("[servisKaydiSil] Musteriler saved.");
-                     // IMPORTANT: Re-render the list for the *currently open* customer modal,
-                     // which might not be the same as musteriIndex if something went wrong.
-                     // Use mevcutMusteriIndex if it's valid and matches musteriIndex.
-                     if (mevcutMusteriIndex === musteriIndex) {
-                         servisGecmisiniGoster(mevcutMusteriIndex);
-                         console.log("[servisKaydiSil] Service list rerendered for current modal.");
-                     } else {
-                         console.warn("[servisKaydiSil] mevcutMusteriIndex does not match musteriIndex. List not refreshed in modal.", {mevcutMusteriIndex, musteriIndex});
-                         // Optionally, you could try to find the customer by ID and refresh if modal is open,
-                         // but it's safer to rely on the correct index being passed.
-                     }
-
-                 } catch(error) {
-                     console.error("[servisKaydiSil] Error during deletion:", error);
-                     alert("Servis kaydı silinirken beklenmedik bir hata oluştu.");
-                     musteriler = JSON.parse(localStorage.getItem('musteriler_v3')) || [];
-                      if (mevcutMusteriIndex === musteriIndex) { // Try to refresh again after reload
-                         servisGecmisiniGoster(mevcutMusteriIndex);
-                      }
-                 }
-            } else {
-                 console.log("[servisKaydiSil] Deletion cancelled by user.");
-            }
-        }
-
-
-        // Update Stock Quantity (from stock list input)
-        function stokGuncelle(index, yeniMiktar) {
-             if (typeof index !== 'number' || index < 0 || index >= stoklar.length || !stoklar[index]) {
-                 console.error("[stokGuncelle] Invalid index or stock data.", index);
-                 alert("Stok güncellenirken bir hata oluştu.");
-                 stoklariGoster();
-                 return;
-             }
-            const miktar = parseInt(yeniMiktar);
-            if (!isNaN(miktar) && miktar >= 0) {
-                stoklar[index].miktar = miktar;
-                stoklariKaydet();
-                stoklariGoster();
-            } else {
-                alert("Lütfen geçerli bir stok miktarı girin (0 veya daha büyük).");
-                stoklariGoster();
-            }
-        }
-
-         // Delete Stock Item
-        function stokSil(index) {
-             if (typeof index !== 'number' || index < 0 || index >= stoklar.length || !stoklar[index]) {
-                 console.error("[stokSil] Invalid index or stock data.", index);
-                 alert("Stok silinirken bir hata oluştu.");
-                 return;
-             }
-             const urunAdi = stoklar[index].ad || 'Bu ürün';
-             if (confirm(`'${urunAdi}' ürününü stoktan silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`)) {
-                 try {
-                    stoklar.splice(index, 1);
-                    stoklariKaydet();
-                    stoklariGoster();
-                 } catch (error) {
-                     console.error("[stokSil] Error during deletion:", error);
-                     alert("Stok silinirken beklenmedik bir hata oluştu.");
-                     stoklar = JSON.parse(localStorage.getItem('stoklar_v3')) || [];
-                     stoklariGoster();
-                 }
-            }
-        }
-
-        // Adjust stock based on used products (Helper function)
-        function adjustStockForProducts(products, type = 'decrease') {
-             if (!Array.isArray(products)) {
-                 console.error("[adjustStockForProducts] Invalid products array.", products);
-                 return false;
-             }
-             let stockAdjusted = true;
-             products.forEach(p => {
-                  if (!p || typeof p !== 'object' || !p.urunId) {
-                      console.warn("[adjustStockForProducts] Skipping invalid product object.", p);
-                      return;
-                  }
-                 const stokIndex = stoklar.findIndex(s => s && s.id === p.urunId);
-                 if (stokIndex > -1) {
-                      const currentStock = stoklar[stokIndex].miktar;
-                      const changeAmount = p.adet || 1;
-
-                      if (typeof currentStock !== 'number' || typeof changeAmount !== 'number') {
-                          console.error(`[adjustStockForProducts] Invalid stock quantity or change amount for product ID ${p.urunId}.`);
-                          stockAdjusted = false;
-                          return;
-                      }
-
-                     if (type === 'decrease') {
-                         if (currentStock >= changeAmount) {
-                             stoklar[stokIndex].miktar -= changeAmount;
-                         } else {
-                             alert(`Stok hatası! ${stoklar[stokIndex].ad || 'Ürün'} için yeterli stok (${currentStock}) bulunmuyor (İstenen: ${changeAmount}). İşlem iptal edildi.`);
-                             stockAdjusted = false;
-                         }
-                     } else { // increase
-                         stoklar[stokIndex].miktar += changeAmount;
-                     }
-                 } else {
-                      console.error(`[adjustStockForProducts] Product ID ${p.urunId} not found in stock.`);
-                 }
-             });
-             return stockAdjusted;
-        }
-
-
-        // --- Event Listeners ---
-
-        // Customer Search Input
-        musteriAramaInput.addEventListener('input', (e) => {
-            musterileriGoster(e.target.value);
-        });
-
-        // Toggle Add New Customer Form
-        yeniMusteriGosterBtn.addEventListener('click', () => {
-            musteriForm.classList.remove('hidden');
-            yeniMusteriGosterBtn.classList.add('hidden');
-        });
-        yeniMusteriIptalBtn.addEventListener('click', () => {
-            musteriForm.classList.add('hidden');
-            yeniMusteriGosterBtn.classList.remove('hidden');
-            musteriForm.reset();
-        });
-
-         // Toggle Add New Product Form
-        yeniUrunGosterBtn.addEventListener('click', () => {
-            stokForm.classList.remove('hidden');
-            yeniUrunGosterBtn.classList.add('hidden');
-        });
-        yeniUrunIptalBtn.addEventListener('click', () => {
-            stokForm.classList.add('hidden');
-            yeniUrunGosterBtn.classList.remove('hidden');
-            stokForm.reset();
-            document.getElementById('min-stok').value = 0;
-        });
-
-
-        // Handle New Customer Form Submission
-        musteriForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const yeniMusteri = {
-                id: Date.now(),
-                ad: document.getElementById('musteri-ad').value.trim(),
-                tel: document.getElementById('musteri-tel').value.trim(),
-                adres: document.getElementById('musteri-adres').value.trim(),
-                cihaz: document.getElementById('musteri-cihaz').value.trim(),
-                teknisyen: document.getElementById('musteri-teknisyen').value.trim(),
-                servisKayitlari: [] // Initialize as empty array
-            };
-            if (!yeniMusteri.ad || !yeniMusteri.tel) {
-                alert("Ad Soyad ve Telefon numarası zorunludur."); return;
-            }
-             if (musteriler.some(m => m && m.tel === yeniMusteri.tel)) {
-                 alert("Bu telefon numarası ile kayıtlı başka bir müşteri zaten var.");
-                 return;
-             }
-            musteriler.push(yeniMusteri);
-            musterileriKaydet();
-            musterileriGoster(musteriAramaInput.value);
-            musteriForm.reset();
-            musteriForm.classList.add('hidden');
-            yeniMusteriGosterBtn.classList.remove('hidden');
-        });
-
-        // Handle New Stock Item Form Submission
-        stokForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const urunAdi = document.getElementById('urun-ad').value.trim();
-            const miktar = parseInt(document.getElementById('stok-miktar').value);
-            const minStok = parseInt(document.getElementById('min-stok').value);
-
-            if (!urunAdi || isNaN(miktar) || miktar < 0 || isNaN(minStok) || minStok < 0) {
-                alert("Lütfen geçerli ürün adı, stok miktarı ve minimum stok seviyesi girin.");
-                return;
-            }
-
-            const mevcutUrunIndex = stoklar.findIndex(urun => urun && urun.ad && urun.ad.toLowerCase() === urunAdi.toLowerCase());
-
-            if (mevcutUrunIndex > -1) {
-                // Ensure miktar is a number before adding
-                if(typeof stoklar[mevcutUrunIndex].miktar === 'number') {
-                    stoklar[mevcutUrunIndex].miktar += miktar;
-                    alert(`'${urunAdi}' ürünü zaten mevcut. Stok miktarı ${miktar} adet artırıldı.`);
-                } else {
-                     alert(`'${urunAdi}' ürününün mevcut stok miktarı geçersiz. Güncelleme yapılamadı.`);
-                     stoklar[mevcutUrunIndex].miktar = miktar; // Overwrite with new valid amount maybe?
-                }
-            } else {
-                 const yeniUrun = {
-                    id: Date.now(),
-                    ad: urunAdi,
-                    miktar: miktar,
-                    minStok: minStok
-                };
-                stoklar.push(yeniUrun);
-            }
-            stoklariKaydet();
-            stoklariGoster();
-            stokForm.reset();
-            document.getElementById('min-stok').value = 0;
-            stokForm.classList.add('hidden');
-            yeniUrunGosterBtn.classList.remove('hidden');
-        });
-
-         // Handle New Service Record Form Submission
-        servisKaydiForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            if (mevcutMusteriIndex === null || typeof mevcutMusteriIndex !== 'number' || !musteriler[mevcutMusteriIndex]) {
-                 alert("Servis kaydı eklenirken hata: Geçerli müşteri seçilmemiş.");
-                 console.error("[servisKaydiForm submit] mevcutMusteriIndex is invalid:", mevcutMusteriIndex);
-                 return;
-             }
-
-            const tarihInput = document.getElementById('servis-tarih').value;
-            const islemTuruInput = document.getElementById('servis-islem-turu').value;
-
-            if (!tarihInput || !islemTuruInput) {
-                 alert("Lütfen İşlem Tarihi ve İşlem Türü seçiniz.");
-                 return;
-            }
-
-            const secilenUrunOptions = Array.from(servisKullanilanUrunlerSelect.selectedOptions);
-            const kullanilanUrunler = secilenUrunOptions.map(option => {
-                const urun = stoklar.find(s => s && s.id == option.value);
-                 if (!urun) {
-                     console.warn(`[servisKaydiForm submit] Product with ID ${option.value} not found.`);
-                     return null;
-                 }
-                return { urunId: urun.id, urunAdi: urun.ad, adet: 1 };
-            }).filter(item => item !== null);
-
-            if (kullanilanUrunler.length > 0) {
-                const stockAvailable = adjustStockForProducts(kullanilanUrunler, 'decrease');
-                if (!stockAvailable) { return; }
-                stoklariKaydet();
-                stoklariGoster();
-            }
-
-            const sonrakiBakimPeriyodu = parseInt(document.getElementById('servis-sonraki-bakim').value);
-            const sonrakiBakimTarihi = addMonths(tarihInput, sonrakiBakimPeriyodu);
-            const teknisyenInput = document.getElementById('servis-teknisyen').value.trim();
-
-            const yeniServisKaydi = {
-                id: Date.now(),
-                tarih: tarihInput,
-                islemTuru: islemTuruInput,
-                kullanilanUrunler: kullanilanUrunler,
-                ekNotlar: document.getElementById('servis-ek-notlar').value.trim(),
-                teknisyen: teknisyenInput || musteriler[mevcutMusteriIndex].teknisyen,
-                sonrakiBakimPeriyodu: sonrakiBakimPeriyodu,
-                sonrakiBakimTarihi: sonrakiBakimTarihi ? sonrakiBakimTarihi.toISOString() : null,
-                ertelemeNotu: document.getElementById('servis-erteleme-notu').value.trim()
-            };
-
-             if (!Array.isArray(musteriler[mevcutMusteriIndex].servisKayitlari)) {
-                 console.warn("[servisKaydiForm submit] Initializing servisKayitlari for customer index:", mevcutMusteriIndex);
-                 musteriler[mevcutMusteriIndex].servisKayitlari = [];
-             }
-
-            musteriler[mevcutMusteriIndex].servisKayitlari.push(yeniServisKaydi);
-            musterileriKaydet();
-            servisGecmisiniGoster(mevcutMusteriIndex);
-            servisKaydiForm.reset();
-            document.getElementById('servis-tarih').value = formatDate(new Date());
-            const musteri = musteriler[mevcutMusteriIndex];
-            document.getElementById('servis-teknisyen').placeholder = `Varsayılan: ${musteri.teknisyen || 'Belirtilmemiş'}`;
-            stokUrunleriniDoldur(servisKullanilanUrunlerSelect);
-        });
-
-        // Handle Service Record Edit Form Submission
-        servisDuzenleForm.addEventListener('submit', (e) => {
-             e.preventDefault();
-             const musteriIndex = parseInt(document.getElementById('edit-musteri-index').value);
-             const kayitIndex = parseInt(document.getElementById('edit-kayit-index').value);
-
-             if (isNaN(musteriIndex) || isNaN(kayitIndex) ||
-                 musteriIndex < 0 || musteriIndex >= musteriler.length || !musteriler[musteriIndex] ||
-                 kayitIndex < 0 || !musteriler[musteriIndex].servisKayitlari || !Array.isArray(musteriler[musteriIndex].servisKayitlari) || kayitIndex >= musteriler[musteriIndex].servisKayitlari.length || !musteriler[musteriIndex].servisKayitlari[kayitIndex]) {
-                 alert("Düzenleme sırasında bir hata oluştu. Müşteri veya kayıt bulunamadı/geçersiz.");
-                 console.error("[servisDuzenleForm submit] Invalid indices or data.", {musteriIndex, kayitIndex});
-                 kapatModal('servisDuzenleModal');
-                 return;
-             }
-
-             const kayit = musteriler[musteriIndex].servisKayitlari[kayitIndex];
-
-             const yeniSecilenUrunOptions = Array.from(editServisKullanilanUrunlerSelect.selectedOptions);
-             const yeniKullanilanUrunler = yeniSecilenUrunOptions.map(option => {
-                 const urun = stoklar.find(s => s && s.id == option.value);
-                  if (!urun) {
-                      console.warn(`[servisDuzenleForm submit] Product with ID ${option.value} not found.`);
-                      return null;
-                  }
-                 return { urunId: urun.id, urunAdi: urun.ad, adet: 1 };
-             }).filter(item => item !== null);
-
-             // --- Stock Adjustment Logic ---
-             const productsToAdd = yeniKullanilanUrunler.filter(yeni => !originalServiceRecordProducts.some(eski => eski && yeni && eski.urunId === yeni.urunId));
-             const productsToRemove = originalServiceRecordProducts.filter(eski => !yeniKullanilanUrunler.some(yeni => eski && yeni && eski.urunId === yeni.urunId));
-
-             if (productsToRemove.length > 0) {
-                 adjustStockForProducts(productsToRemove, 'increase');
-             }
-
-             let stockAdjustmentSuccessful = true;
-             if (productsToAdd.length > 0) {
-                 stockAdjustmentSuccessful = adjustStockForProducts(productsToAdd, 'decrease');
-             }
-
-             if (!stockAdjustmentSuccessful) {
-                 if (productsToRemove.length > 0) {
-                     adjustStockForProducts(productsToRemove, 'decrease'); // Revert
-                 }
-                 alert("Stok yetersizliği nedeniyle değişiklikler kaydedilemedi.");
-                 return;
-             }
-             // --- End Stock Adjustment Logic ---
-
-
-             const tarihInput = document.getElementById('edit-servis-tarih').value;
-             const sonrakiBakimPeriyodu = parseInt(document.getElementById('edit-servis-sonraki-bakim').value);
-             const sonrakiBakimTarihi = addMonths(tarihInput, sonrakiBakimPeriyodu);
-
-             kayit.tarih = tarihInput;
-             kayit.islemTuru = document.getElementById('edit-servis-islem-turu').value;
-             kayit.teknisyen = document.getElementById('edit-servis-teknisyen').value.trim() || musteriler[musteriIndex].teknisyen;
-             kayit.kullanilanUrunler = yeniKullanilanUrunler;
-             kayit.ekNotlar = document.getElementById('edit-servis-ek-notlar').value.trim();
-             kayit.sonrakiBakimPeriyodu = sonrakiBakimPeriyodu;
-             kayit.sonrakiBakimTarihi = sonrakiBakimTarihi ? sonrakiBakimTarihi.toISOString() : null;
-             kayit.ertelemeNotu = document.getElementById('edit-servis-erteleme-notu').value.trim();
-
-             musterileriKaydet();
-             stoklariKaydet();
-             stoklariGoster();
-
-             servisGecmisiniGoster(musteriIndex);
-             kapatModal('servisDuzenleModal');
-        });
-
-
-        // Close modal on outside click
-        window.onclick = function(event) {
-            if (event.target == musteriDetayModal) {
-                kapatModal('musteriDetayModal');
-            }
-            if (event.target == servisDuzenleModal) {
-                 kapatModal('servisDuzenleModal');
-            }
-        }
-
-        // --- Initial Rendering ---
-        document.addEventListener('DOMContentLoaded', () => {
-             console.log("DOM Loaded. Initializing application..."); // DEBUG
-             try {
-                let loadedMusteriler = JSON.parse(localStorage.getItem('musteriler_v3')) || [];
-                let loadedStoklar = JSON.parse(localStorage.getItem('stoklar_v3')) || [];
-
-                // --- Data Validation on Load ---
-                musteriler = Array.isArray(loadedMusteriler) ? loadedMusteriler.filter(m => m && m.id) : [];
-                stoklar = Array.isArray(loadedStoklar) ? loadedStoklar.filter(s => s && s.id) : [];
-
-                if (musteriler.length !== loadedMusteriler.length) {
-                    console.warn("Invalid customer data found in localStorage and removed.");
-                }
-                 if (stoklar.length !== loadedStoklar.length) {
-                    console.warn("Invalid stock data found in localStorage and removed.");
-                }
-                // --- End Validation ---
-
-
-                console.log("Loaded musteriler:", musteriler); // DEBUG
-                console.log("Loaded stoklar:", stoklar); // DEBUG
-
-                musterileriGoster();
-                stoklariGoster();
-                stokUrunleriniDoldur(servisKullanilanUrunlerSelect);
-                stokUrunleriniDoldur(editServisKullanilanUrunlerSelect);
-                console.log("Initial rendering complete."); // DEBUG
-
-             } catch (error) {
-                 console.error("Error during initial load:", error);
-                 alert("Veriler yüklenirken bir hata oluştu. localStorage bozulmuş olabilir veya veriler geçersiz formatta.");
-                 // Attempt to clear corrupted data (use with caution)
-                 // localStorage.removeItem('musteriler_v3');
-                 // localStorage.removeItem('stoklar_v3');
-                 musteriler = [];
-                 stoklar = [];
-                 // Try to render empty state
-                 musterileriGoster();
-                 stoklariGoster();
-             }
-        });
-
-    </script>
-
-</body>
-</html>
+        <div id="servisDuzenleModal" class="modal">
+            <div class="modal-content">
+                <span class="modal-close-button" onclick="kapatModal('servisDuzenleModal')">&times;</span>
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Servis Kaydını Düzenle</h3>
+                <form id="servis-duzenle-form" class="space-y-3">
+                    <input type="hidden" id="edit-musteri-index">
+                    <input type="hidden" id="edit-kayit-index">
+                    <input type="hidden" id="edit-kayit-id">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="edit-servis-tarih" class="block text-sm font-medium text-gray-700">İşlem Tarihi
+                                *</label>
+                            <input type="date" id="edit-servis-tarih" required
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                        </div>
+                        <div>
+                            <label for="edit-servis-islem-turu" class="block text-sm font-medium text-gray-700">İşlem
+                                Türü *</label>
+                            <select id="edit-servis-islem-turu" required
+                                    class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm sm:text-sm">
+                                <option value="">Seçiniz...</option>
+                                <option value="Bakım">Bakım</option>
+                                <option value="Arıza">Arıza</option>
+                                <option value="Montaj">Montaj</option>
+                                <option value="Montaj-2">Montaj-2</option>
+                                <option value="Diğer">Diğer</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="edit-servis-teknisyen" class="block text-sm font-medium text-gray-700">İlgilenen
+                            Teknisyen</label>
+                        <input type="text" id="edit-servis-teknisyen"
+                               class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm">
+                    </div>
+                    <div>
+                        <label for="edit-servis-kullanilan-urunler" class="block text-sm font-medium text-gray-700">Yapılan
+                            Değişim / Kullanılan Ürünler (Stoktan Düşer)</label>
+                        <select id="edit-servis-kullanilan-urunler" multiple
+                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm sm:text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Birden fazla seçmek için Ctrl (Windows) veya Cmd (Mac) tuşunu basılı tutun.
+                        </p>
+                    </div>
+                    <div>
+                        <label for="edit-servis-ek-notlar" class="block text-sm font-medium text-gray-700">Ek Notlar /
+                            Açıklama</label>
+                        <textarea id="edit-servis-ek-notlar" rows="2"
+                                  class="mt-1 block w-full px-3 
