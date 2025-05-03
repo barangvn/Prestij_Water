@@ -216,3 +216,18 @@
                      <thead class="bg-gray-100 sticky top-0">
                          <tr>
                              <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ürün Adı
+                               set(ref(db, 'musteriler'), {
+  ad: musteriAd,
+  tel: musteriTel,
+  // ... diğer veriler
+})
+.then(() => {
+  console.log("Müşteri başarıyla kaydedildi!");
+  // Başarılı işlem sonrası yapılacaklar (formu temizle, mesaj göster vb.)
+})
+.catch((error) => {
+  console.error("Müşteri kaydedilirken bir hata oluştu:", error);
+  alert("Müşteri kaydedilirken bir hata oluştu.");
+  // Hata durumunda kullanıcıya bilgi verme
+});
+                               
