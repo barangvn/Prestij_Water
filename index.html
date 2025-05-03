@@ -1,3 +1,41 @@
+<!-- Firebase SDK'ları -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAmW3qdlm49cvfVeP27DaAMGJwtKDJ6kyI",
+    authDomain: "prestij-water.firebaseapp.com",
+    databaseURL: "https://prestij-water-default-rtdb.firebaseio.com",
+    projectId: "prestij-water",
+    storageBucket: "prestij-water.firebasestorage.app",
+    messagingSenderId: "712467125722",
+    appId: "1:712467125722:web:e845679e5d456fda2f5ce3",
+    measurementId: "G-G0ZYR03RVL"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
+  // Örnek yazma fonksiyonu
+  window.veriKaydet = function() {
+    const deger = document.getElementById("veriInput").value;
+    set(ref(db, "veri/mesaj"), {
+      metin: deger
+    });
+  };
+
+  // Örnek okuma fonksiyonu
+  onValue(ref(db, "veri/mesaj"), (snapshot) => {
+    const veri = snapshot.val();
+    if (veri && veri.metin) {
+      document.getElementById("veriGoster").innerText = veri.metin;
+    }
+  });
+</script>
+
+</body>
+</html>
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -1149,43 +1187,3 @@
         });
 
     </script>
-
-
-<!-- Firebase SDK'ları -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-  import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyAmW3qdlm49cvfVeP27DaAMGJwtKDJ6kyI",
-    authDomain: "prestij-water.firebaseapp.com",
-    databaseURL: "https://prestij-water-default-rtdb.firebaseio.com",
-    projectId: "prestij-water",
-    storageBucket: "prestij-water.firebasestorage.app",
-    messagingSenderId: "712467125722",
-    appId: "1:712467125722:web:e845679e5d456fda2f5ce3",
-    measurementId: "G-G0ZYR03RVL"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-
-  // Örnek yazma fonksiyonu
-  window.veriKaydet = function() {
-    const deger = document.getElementById("veriInput").value;
-    set(ref(db, "veri/mesaj"), {
-      metin: deger
-    });
-  };
-
-  // Örnek okuma fonksiyonu
-  onValue(ref(db, "veri/mesaj"), (snapshot) => {
-    const veri = snapshot.val();
-    if (veri && veri.metin) {
-      document.getElementById("veriGoster").innerText = veri.metin;
-    }
-  });
-</script>
-
-</body>
-</html>
