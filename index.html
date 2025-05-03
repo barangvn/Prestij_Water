@@ -1189,38 +1189,5 @@
 
 </body>
 </html>
-// Bu kodun Firebase Realtime Database kullandığınızı varsaydığını unutmayın.
-// Firestore kullanıyorsanız, Firestore'a özel kod kullanmanız gerekir.
-
-// Önce Firebase veritabanı referansını alın (zaten varsa bu satıra gerek yok)
-const dbRef = firebase.database().ref(); // Veya db = getDatabase(); ref() vs. yeni SDK kullanıyorsanız
-
-const testButton = document.getElementById('testButton');
-const testDataDisplay = document.getElementById('testDataDisplay');
-const testPath = 'testNode/simpleTest'; // Basit bir veritabanı yolu
-
-// Düğmeye tıklanınca şu anki saati Firebase'e yaz
-testButton.addEventListener('click', () => {
-  const timestamp = new Date().toISOString();
-  dbRef.child(testPath).set(timestamp)
-    .then(() => {
-      console.log("Test verisi yazıldı:", timestamp);
-    })
-    .catch((error) => {
-      console.error("Test verisi yazma hatası:", error);
-    });
-});
-
-// Firebase'deki test verisini dinle ve ekranda göster
-dbRef.child(testPath).on('value', (snapshot) => {
-  const data = snapshot.val();
-  if (data) {
-    console.log("Test verisi okundu:", data);
-    testDataDisplay.textContent = `Alınan Test Verisi: ${data}`;
-  } else {
-    testDataDisplay.textContent = "Henüz test verisi yok.";
-  }
-}, (error) => {
-  console.error("Test verisi okuma hatası:", error);
-  testDataDisplay.textContent = "Veri okunamadı!";
-});
+<button id="testButton">Test Verisi Yaz</button>
+<div id="testDataDisplay">Veri bekleniyor...</div>
