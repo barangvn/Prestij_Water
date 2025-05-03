@@ -259,4 +259,11 @@ musteriForm.addEventListener('submit', function(event) {
     alert("Müşteri kaydedilirken bir hata oluştu: " + error.message);
   });
 });
+                               function musterileriOkuVeGoster() {
+  onValue(ref(db, 'musteriler'), (snapshot) => {
+    const data = snapshot.val();
+    musteriler = data ? Object.values(data) : []; // Verileri bir diziye dönüştür
+    musterileriGoster(); // HTML'de gösterme fonksiyonunu çağır
+  });
+}
                                
