@@ -1,112 +1,71 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Prestij Water</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <script type="module">
-    // Firebase SDK importları
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
-
-    // Firebase yapılandırma
-    const firebaseConfig = {
-      apiKey: "AIzaSyAmW3qdlm49cvfVeP27DaAMGJwtKDJ6kyI",
-      authDomain: "prestij-water.firebaseapp.com",
-      databaseURL: "https://prestij-water-default-rtdb.firebaseio.com",
-      projectId: "prestij-water",
-      storageBucket: "prestij-water.appspot.com",
-      messagingSenderId: "712467125722",
-      appId: "1:712467125722:web:e845679e5d456fda2f5ce3",
-      measurementId: "G-G0ZYR03RVL"
-    };
-
-    // Başlat
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const dataRef = ref(db, 'veriler');
-
-    // Veri ekleme
-    window.kaydet = function () {
-      const isim = document.getElementById("isim").value.trim();
-      if (isim === "") return;
-
-      const yeniRef = push(dataRef);
-      set(yeniRef, isim);
-      document.getElementById("isim").value = "";
-    };
-
-    // Listeyi güncelle
-    onValue(dataRef, (snapshot) => {
-      const liste = document.getElementById("liste");
-      liste.innerHTML = "";
-
-      snapshot.forEach((childSnapshot) => {
-        const key = childSnapshot.key;
-        const value = childSnapshot.val();
-
-        const p = document.createElement("p");
-        p.textContent = value;
-
-        const btn = document.createElement("button");
-        btn.textContent = "Sil";
-        btn.onclick = () => remove(ref(db, "veriler/" + key));
-
-        const div = document.createElement("div");
-        div.appendChild(p);
-        div.appendChild(btn);
-        div.style.marginBottom = "10px";
-
-        liste.appendChild(div);
-      });
-    });
-  </script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background-color: #f5f5f5;
-    }
-
-    h2 {
-      color: #0074D9;
-    }
-
-    input {
-      padding: 10px;
-      font-size: 16px;
-      width: 250px;
-    }
-
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-left: 10px;
-      cursor: pointer;
-      background-color: #0074D9;
-      color: white;
-      border: none;
-    }
-
-    button:hover {
-      background-color: #005fa3;
-    }
-
-    #liste p {
-      display: inline-block;
-      margin-right: 10px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>Firebase Entegrasyon</title>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body>
+  <h1>Firebase Realtime Database Test</h1>
 
-  <h2>Müşteri Girişi</h2>
-  <input type="text" id="isim" placeholder="İsim girin">
-  <button onclick="kaydet()">Kaydet</button>
+  <input type="text" id="dataInput" placeholder="Veri girin" />
+  <button onclick="writeData()">Veriyi Kaydet</button>
 
-  <div id="liste" style="margin-top: 30px;"></div>
+  <h2>Veritabanından Okunan Veri:</h2>
+  <div id="dataOutput">Henüz veri yok</div>
 
+  <!-- FIREBASE -->
+  <script>
+    // Firebase yapılandırmanı buraya yapıştır
+    const firebaseConfig = // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAmW3qdlm49cvfVeP27DaAMGJwtKDJ6kyI",
+  authDomain: "prestij-water.firebaseapp.com",
+  databaseURL: "https://prestij-water-default-rtdb.firebaseio.com",
+  projectId: "prestij-water",
+  storageBucket: "prestij-water.firebasestorage.app",
+  messagingSenderId: "712467125722",
+  appId: "1:712467125722:web:e845679e5d456fda2f5ce3",
+  measurementId: "G-G0ZYR03RVL"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+      apiKey: "API_KEY",
+      authDomain: "proje-adi.firebaseapp.com",
+      databaseURL: "https://proje-adi-default-rtdb.firebaseio.com",
+      projectId: "proje-adi",
+      storageBucket: "proje-adi.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdefg"
+    };
+
+    // Firebase başlat
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // Veri yazma
+    function writeData() {
+      const input = document.getElementById("dataInput").value;
+      db.ref("veri").set({
+        metin: input
+      });
+    }
+
+    // Veri okuma (anlık güncelleme)
+    db.ref("veri").on("value", function(snapshot) {
+      const data = snapshot.val();
+      document.getElementById("dataOutput").innerText = data ? data.metin : "Henüz veri yok";
+    });
+  </script>
 </body>
 </html>
