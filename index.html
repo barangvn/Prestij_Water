@@ -2,12 +2,13 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Prestij Water</title>
+  <title>Prestij Water - Canlı Veri</title>
   <script type="module">
-    // Firebase import
+    // Firebase SDK'yı import et
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
-    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+    import { getDatabase, ref, push, set, onValue, remove } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
+    // Firebase yapılandırması
     const firebaseConfig = {
       apiKey: "AIzaSyAmW3qdlm49cvfVeP27DaAMGJwtKDJ6kyI",
       authDomain: "prestij-water.firebaseapp.com",
@@ -19,80 +20,78 @@
       measurementId: "G-G0ZYR03RVL"
     };
 
+    // Firebase'i başlat
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const dataRef = ref(db, 'veriler');
 
-    // Form gönderildiğinde veri kaydet
-    window.sendData = function () {
-      const name = document.getElementById("name").value;
-      if (!name.trim()) return;
+    // Yeni veri gönder
+    window.veriEkle = () => {
+      const input = document.getElementById('veriInput');
+      const yeniVeri = input.value.trim();
+      if (!yeniVeri) return;
 
-      push(ref(db, "musteriler"), {
-        ad: name,
-        tarih: new Date().toLocaleString()
-      });
-
-      document.getElementById("name").value = "";
+      const yeniRef = push(dataRef);
+      set(yeniRef, yeniVeri);
+      input.value = '';
     };
 
-    // Verileri çek ve listele
-    const musteriRef = ref(db, "musteriler");
-    onValue(musteriRef, (snapshot) => {
-      const list = document.getElementById("list");
-      list.innerHTML = "";
+    // Firebase'den veri çek ve listele
+    onValue(dataRef, (snapshot) => {
+      const liste = document.getElementById('veriListesi');
+      liste.innerHTML = '';
       snapshot.forEach(child => {
-        const item = child.val();
-        const li = document.createElement("li");
-        li.textContent = `${item.ad} (${item.tarih})`;
-        list.appendChild(li);
+        const key = child.key;
+        const value = child.val();
+
+        const li = document.createElement('li');
+        li.textContent = value;
+
+        const silBtn = document.createElement('button');
+        silBtn.textContent = 'Sil';
+        silBtn.onclick = () => remove(ref(db, 'veriler/' + key));
+
+        li.appendChild(silBtn);
+        liste.appendChild(li);
       });
     });
   </script>
 
   <style>
     body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
+      font-family: sans-serif;
+      margin: 2em;
+      background: #f2f2f2;
     }
 
-    .container {
-      padding: 1em;
+    h1 {
+      color: #0074D9;
     }
 
-    input {
-      padding: 8px;
+    input, button {
+      padding: 0.5em;
+      margin: 0.3em;
       font-size: 1em;
-      margin-right: 8px;
+    }
+
+    li {
+      margin-bottom: 0.5em;
     }
 
     button {
-      padding: 8px 12px;
-      font-size: 1em;
-    }
-
-    ul {
-      margin-top: 1em;
-    }
-
-    iframe {
-      width: 100%;
-      height: 400px;
+      margin-left: 1em;
+      background: #FF4136;
+      color: white;
       border: none;
-      margin-top: 2em;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>Müşteri Girişi</h2>
-    <input type="text" id="name" placeholder="Müşteri adı girin" />
-    <button onclick="sendData()">Kaydet</button>
+  <h1>Canlı Veri Paylaşımı (Firebase)</h1>
+  <input type="text" id="veriInput" placeholder="Bir veri girin">
+  <button onclick="veriEkle()">Ekle</button>
 
-    <ul id="list"></ul>
-
-    <h2>Canlı Yayın</h2>
-    <iframe src="https://tw.yw11.com/tvzb/j2/" allowfullscreen></iframe>
-  </div>
+  <ul id="veriListesi"></ul>
 </body>
 </html>
