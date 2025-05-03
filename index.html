@@ -230,4 +230,33 @@
   alert("Müşteri kaydedilirken bir hata oluştu.");
   // Hata durumunda kullanıcıya bilgi verme
 });
+                               const musteriForm = document.getElementById('musteri-form');
+musteriForm.addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  const musteriAd = document.getElementById('musteri-ad').value;
+  const musteriTel = document.getElementById('musteri-tel').value;
+  const musteriAdres = document.getElementById('musteri-adres').value;
+  const musteriCihaz = document.getElementById('musteri-cihaz').value;
+  const musteriTeknisyen = document.getElementById('musteri-teknisyen').value;
+
+  set(ref(db, 'musteriler'), {
+    ad: musteriAd,
+    tel: musteriTel,
+    adres: musteriAdres,
+    cihaz: musteriCihaz,
+    teknisyen: musteriTeknisyen
+  })
+  .then(() => {
+    console.log("Müşteri başarıyla kaydedildi!");
+    alert("Müşteri başarıyla kaydedildi!");
+    musteriForm.reset();
+    document.getElementById('yeni-musteri-goster-btn').click(); // Formu gizle
+    musterileriOkuVeGoster(); // Müşteri listesini güncelle
+  })
+  .catch((error) => {
+    console.error("Müşteri kaydedilirken bir hata oluştu:", error);
+    alert("Müşteri kaydedilirken bir hata oluştu: " + error.message);
+  });
+});
                                
