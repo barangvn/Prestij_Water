@@ -72,6 +72,11 @@
 
             <h3>Stokları Görüntüle</h3>
             <ul id="stockList"></ul>
+
+            <h3>Stok Atama</h3>
+            <input type="text" id="customerIdForStock" placeholder="Müşteri ID">
+            <input type="text" id="stockIdForCustomer" placeholder="Stok ID">
+            <button onclick="assignStockToCustomer()">Stok Atama</button>
         </div>
     </div>
 
@@ -163,6 +168,17 @@
                     stockList.appendChild(listItem);
                 }
             });
+        }
+
+        // Müşteriye Stok Atama Fonksiyonu
+        function assignStockToCustomer() {
+            const customerId = document.getElementById('customerIdForStock').value;
+            const stockId = document.getElementById('stockIdForCustomer').value;
+
+            const customerRef = db.ref('customers/' + customerId + '/assignedStock');
+            customerRef.push(stockId);
+
+            alert('Stok müşteriyle ilişkilendirildi');
         }
 
         // Sayfa yüklendiğinde verileri al
