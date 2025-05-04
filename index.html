@@ -2,88 +2,129 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Su Arıtma Takip Sistemi</title>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; }
+    header { background: #0099cc; color: white; padding: 1rem; text-align: center; }
+
+    .tab-buttons {
+      display: none;
+      justify-content: space-around;
+      background-color: #eee;
+    }
+    .tab-buttons button {
+      flex: 1;
+      padding: 1rem;
+      border: none;
+      background: #eee;
+      font-weight: bold;
+    }
+    .tab-buttons button.active {
+      background-color: #0099cc;
+      color: white;
+    }
+
+    .container {
       display: flex;
-      height: 100vh;
+      height: calc(100vh - 60px);
     }
-    .left, .right {
-      width: 50%;
-      padding: 20px;
-      box-sizing: border-box;
+    .panel {
+      flex: 1;
+      padding: 1rem;
       overflow-y: auto;
+      border: 1px solid #ccc;
     }
-    .left {
-      background-color: #f0f8ff;
-      border-right: 2px solid #ccc;
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+      }
+      .tab-buttons {
+        display: flex;
+      }
+      .panel {
+        display: none;
+        height: auto;
+      }
+      .panel.active {
+        display: block;
+      }
     }
-    .right {
-      background-color: #fffbe6;
+
+    .section {
+      margin-bottom: 1rem;
     }
-    h2 {
-      margin-top: 0;
+    .section h3 {
+      margin-bottom: 0.5rem;
     }
-    input, button {
-      margin: 5px 0;
-      padding: 5px;
+    label {
+      display: block;
+      margin: 0.5rem 0 0.25rem;
+    }
+    input, select, button {
+      padding: 0.5rem;
       width: 100%;
+      margin-bottom: 0.5rem;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
-      border: 1px solid #aaa;
-      padding: 5px;
-      text-align: left;
-    }
+    ul { list-style: none; margin-top: 1rem; }
+    li { padding: 0.5rem; border-bottom: 1px solid #ccc; }
+    .history-btn { margin-top: 0.5rem; background: #f0ad4e; color: white; }
   </style>
 </head>
 <body>
+  <header>
+    <h1>Su Arıtma Takip Sistemi</h1>
+  </header>
 
-  <!-- SOL: MÜŞTERİLER -->
-  <div class="left">
-    <h2>Müşteri Ekle</h2>
-    <input type="text" id="ad" placeholder="Ad Soyad" />
-    <input type="text" id="telefon" placeholder="Telefon" />
-    <input type="text" id="adres" placeholder="Adres" />
-    <button onclick="musteriEkle()">Ekle</button>
-
-    <h2>Müşteri Listesi</h2>
-    <table id="musteriTable">
-      <thead>
-        <tr><th>Ad</th><th>Telefon</th><th>Adres</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <div class="tab-buttons">
+    <button id="btnCustomers" class="active">Müşteriler</button>
+    <button id="btnStock">Stoklar</button>
   </div>
 
-  <!-- SAĞ: STOK -->
-  <div class="right">
-    <h2>Stok Ekle</h2>
-    <input type="text" id="urun" placeholder="Ürün Adı" />
-    <input type="number" id="adet" placeholder="Adet" />
-    <button onclick="stokEkle()">Stok Ekle</button>
+  <div class="container">
+    <!-- Müşteriler Paneli -->
+    <div id="customerPanel" class="panel active">
+      <div class="section">
+        <h3>Yeni Müşteri Ekle</h3>
+        <label>İsim</label>
+        <input type="text" id="customerName" />
+        <label>Telefon</label>
+        <input type="text" id="customerPhone" />
+        <button onclick="addCustomer()">Ekle</button>
+      </div>
 
-    <h2>Stok Listesi</h2>
-    <table id="stokTable">
-      <thead>
-        <tr><th>Ürün</th><th>Adet</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+      <div class="section">
+        <h3>Müşteri Listesi</h3>
+        <ul id="customerList"></ul>
+      </div>
+    </div>
+
+    <!-- Stok Paneli -->
+    <div id="stockPanel" class="panel">
+      <div class="section">
+        <h3>Yeni Ürün Ekle</h3>
+        <label>Ürün Adı</label>
+        <input type="text" id="productName" />
+        <label>Adet</label>
+        <input type="number" id="productQuantity" />
+        <label>Kritik Stok Miktarı</label>
+        <input type="number" id="productCritical" />
+        <button onclick="addProduct()">Ürün Ekle</button>
+      </div>
+
+      <div class="section">
+        <h3>Stok Listesi</h3>
+        <ul id="productList"></ul>
+      </div>
+    </div>
   </div>
 
-  <!-- Firebase ve JS -->
-  <script>
-    // 🔥 Firebase Ayarları
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyAmW3qdlm49cvfVeP27DaAMGJwtKDJ6kyI",
       authDomain: "prestij-water.firebaseapp.com",
@@ -95,54 +136,70 @@
       measurementId: "G-G0ZYR03RVL"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    // MÜŞTERİ EKLE
-    function musteriEkle() {
-      const ad = document.getElementById("ad").value;
-      const telefon = document.getElementById("telefon").value;
-      const adres = document.getElementById("adres").value;
-      if (ad && telefon && adres) {
-        const yeniRef = db.ref("musteriler").push();
-        yeniRef.set({ ad, telefon, adres });
-      }
+    // Müşteri Ekleme
+    window.addCustomer = function () {
+      const name = document.getElementById("customerName").value;
+      const phone = document.getElementById("customerPhone").value;
+      if (!name || !phone) return;
+      const customerRef = push(ref(db, "customers"));
+      set(customerRef, { name, phone, history: [] });
+      document.getElementById("customerName").value = "";
+      document.getElementById("customerPhone").value = "";
     }
 
-    // MÜŞTERİLERİ LİSTELE
-    db.ref("musteriler").on("value", (snapshot) => {
-      const tbody = document.querySelector("#musteriTable tbody");
-      tbody.innerHTML = "";
-      snapshot.forEach((child) => {
-        const data = child.val();
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${data.ad}</td><td>${data.telefon}</td><td>${data.adres}</td>`;
-        tbody.appendChild(tr);
+    // Ürün Ekleme
+    window.addProduct = function () {
+      const name = document.getElementById("productName").value;
+      const quantity = parseInt(document.getElementById("productQuantity").value);
+      const critical = parseInt(document.getElementById("productCritical").value);
+      if (!name || isNaN(quantity) || isNaN(critical)) return;
+      const productRef = push(ref(db, "products"));
+      set(productRef, { name, quantity, critical });
+      document.getElementById("productName").value = "";
+      document.getElementById("productQuantity").value = "";
+      document.getElementById("productCritical").value = "";
+    }
+
+    // Listeleme
+    const customerList = document.getElementById("customerList");
+    onValue(ref(db, "customers"), snapshot => {
+      customerList.innerHTML = "";
+      snapshot.forEach(child => {
+        const c = child.val();
+        const li = document.createElement("li");
+        li.innerHTML = `<strong>${c.name}</strong> (${c.phone})<br><button class='history-btn'>Geçmiş</button>`;
+        customerList.appendChild(li);
       });
     });
 
-    // STOK EKLE
-    function stokEkle() {
-      const urun = document.getElementById("urun").value;
-      const adet = document.getElementById("adet").value;
-      if (urun && adet) {
-        const yeniRef = db.ref("stok").push();
-        yeniRef.set({ urun, adet: parseInt(adet) });
-      }
-    }
-
-    // STOKLARI LİSTELE
-    db.ref("stok").on("value", (snapshot) => {
-      const tbody = document.querySelector("#stokTable tbody");
-      tbody.innerHTML = "";
-      snapshot.forEach((child) => {
-        const data = child.val();
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td>${data.urun}</td><td>${data.adet}</td>`;
-        tbody.appendChild(tr);
+    const productList = document.getElementById("productList");
+    onValue(ref(db, "products"), snapshot => {
+      productList.innerHTML = "";
+      snapshot.forEach(child => {
+        const p = child.val();
+        const li = document.createElement("li");
+        const warn = p.quantity <= p.critical ? "<span style='color:red'>(Kritik!)</span>" : "";
+        li.innerHTML = `${p.name} - ${p.quantity} adet ${warn}`;
+        productList.appendChild(li);
       });
     });
+
+    // Sekme kontrolü (mobil)
+    document.getElementById("btnCustomers").onclick = () => {
+      document.getElementById("btnCustomers").classList.add("active");
+      document.getElementById("btnStock").classList.remove("active");
+      document.getElementById("customerPanel").classList.add("active");
+      document.getElementById("stockPanel").classList.remove("active");
+    }
+    document.getElementById("btnStock").onclick = () => {
+      document.getElementById("btnCustomers").classList.remove("active");
+      document.getElementById("btnStock").classList.add("active");
+      document.getElementById("customerPanel").classList.remove("active");
+      document.getElementById("stockPanel").classList.add("active");
+    }
   </script>
-
 </body>
 </html>
