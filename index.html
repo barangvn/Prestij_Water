@@ -1,86 +1,102 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Su Arıtma Takip Sistemi</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div class="container">
-    <!-- Müşteri Listesi -->
-    <div class="customer-section">
-      <h2>Müşteri Listesi</h2>
-      <table id="customerTable">
-        <thead>
-          <tr>
-            <th>Adı</th>
-            <th>Ev Adresi</th>
-            <th>Geçmiş</th>
-            <th>İşlemler</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Müşteri Verisi Burada Listelenecek -->
-        </tbody>
-      </table>
-      <button id="addCustomerBtn">Yeni Müşteri Ekle</button>
-    </div>
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 
-    <!-- Stok Takibi -->
-    <div class="stock-section">
-      <h2>Stok Takibi</h2>
-      <table id="stockTable">
-        <thead>
-          <tr>
-            <th>Ürün Adı</th>
-            <th>Adet</th>
-            <th>Kritik Stok</th>
-            <th>İşlemler</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Stok Verisi Burada Listelenecek -->
-        </tbody>
-      </table>
-      <button id="addStockBtn">Yeni Ürün Ekle</button>
-    </div>
-  </div>
+// Firebase yapılandırma
+const firebaseConfig = {
+    apiKey: "AIzaSyAmW3qdlm49cvfVeP27DaAMGJwtKDJ6kyI",
+    authDomain: "prestij-water.firebaseapp.com",
+    databaseURL: "https://prestij-water-default-rtdb.firebaseio.com",
+    projectId: "prestij-water",
+    storageBucket: "prestij-water.firebasestorage.app",
+    messagingSenderId: "712467125722",
+    appId: "1:712467125722:web:e845679e5d456fda2f5ce3",
+    measurementId: "G-G0ZYR03RVL"
+};
 
-  <!-- Müşteri Ekleme/Düzenleme Modalı -->
-  <div id="customerModal" class="modal">
-    <div class="modal-content">
-      <span id="closeModal" class="close">&times;</span>
-      <h2>Yeni Müşteri Ekle</h2>
-      <form id="customerForm">
-        <label for="customerName">Adı:</label>
-        <input type="text" id="customerName" required>
-        <label for="customerAddress">Ev Adresi:</label>
-        <input type="text" id="customerAddress" required>
-        <label for="customerHistory">Geçmiş:</label>
-        <input type="text" id="customerHistory">
-        <button type="submit">Kaydet</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Stok Ekleme Modalı -->
-  <div id="stockModal" class="modal">
-    <div class="modal-content">
-      <span id="closeStockModal" class="close">&times;</span>
-      <h2>Yeni Ürün Ekle</h2>
-      <form id="stockForm">
-        <label for="productName">Ürün Adı:</label>
-        <input type="text" id="productName" required>
-        <label for="productQuantity">Adet:</label>
-        <input type="number" id="productQuantity" required>
-        <label for="criticalStock">Kritik Stok:</label>
-        <input type="number" id="criticalStock" required>
-        <button type="submit">Kaydet</button>
-      </form>
-    </div>
-  </div>
-
-  <script src="app.js"></script>
-</body>
-</html>
+// Firebase'i başlat
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+// Müşteri ekleme fonksiyonu
+function addCustomer(name, address, phone) {
+    const customerRef = firebase.database().ref('customers');
+    const newCustomerRef = customerRef.push();
+    newCustomerRef.set({
+        name: name,
+        address: address,
+        phone: phone,
+        maintenanceHistory: [],
+        installationHistory: [],
+        repairHistory: []
+    });
+}
+// Müşteri düzenleme fonksiyonu
+function updateCustomer(customerId, updatedData) {
+    const customerRef = firebase.database().ref('customers/' + customerId);
+    customerRef.update(updatedData);
+}
+// Müşteri silme fonksiyonu
+function deleteCustomer(customerId) {
+    const customerRef = firebase.database().ref('customers/' + customerId);
+    customerRef.remove();
+}
+// Stok ekleme fonksiyonu
+function addStockItem(name, quantity, criticalStock) {
+    const stockRef = firebase.database().ref('stock');
+    const newStockRef = stockRef.push();
+    newStockRef.set({
+        name: name,
+        quantity: quantity,
+        criticalStock: criticalStock
+    });
+}
+// Stok güncelleme fonksiyonu
+function updateStockItem(stockId, updatedData) {
+    const stockRef = firebase.database().ref('stock/' + stockId);
+    stockRef.update(updatedData);
+}
+// Stok silme fonksiyonu
+function deleteStockItem(stockId) {
+    const stockRef = firebase.database().ref('stock/' + stockId);
+    stockRef.remove();
+}
+// Müşteriye stok atama fonksiyonu
+function assignStockToCustomer(customerId, stockId) {
+    const customerRef = firebase.database().ref('customers/' + customerId + '/assignedStock');
+    customerRef.push(stockId);
+}
+<!-- Müşteri Ekleme -->
+<h3>Müşteri Ekle</h3>
+<input type="text" id="customerName" placeholder="Müşteri Adı" required>
+<input type="text" id="customerAddress" placeholder="Müşteri Adresi" required>
+<input type="text" id="customerPhone" placeholder="Müşteri Telefon" required>
+<button onclick="addCustomer(
+    document.getElementById('customerName').value,
+    document.getElementById('customerAddress').value,
+    document.getElementById('customerPhone').value
+)">Müşteri Ekle</button>
+<!-- Stok Ekleme -->
+<h3>Stok Ekle</h3>
+<input type="text" id="stockName" placeholder="Ürün Adı" required>
+<input type="number" id="stockQuantity" placeholder="Miktar" required>
+<input type="number" id="criticalStock" placeholder="Kritik Stok" required>
+<button onclick="addStockItem(
+    document.getElementById('stockName').value,
+    document.getElementById('stockQuantity').value,
+    document.getElementById('criticalStock').value
+)">Stok Ekle</button>
+<!-- Müşteriye Stok Atama -->
+<h3>Stok Atama</h3>
+<input type="text" id="customerIdForStock" placeholder="Müşteri ID">
+<input type="text" id="stockIdForCustomer" placeholder="Stok ID">
+<button onclick="assignStockToCustomer(
+    document.getElementById('customerIdForStock').value,
+    document.getElementById('stockIdForCustomer').value
+)">Stok Atama</button>
+<!-- Müşteriye Stok Atama -->
+<h3>Stok Atama</h3>
+<input type="text" id="customerIdForStock" placeholder="Müşteri ID">
+<input type="text" id="stockIdForCustomer" placeholder="Stok ID">
+<button onclick="assignStockToCustomer(
+    document.getElementById('customerIdForStock').value,
+    document.getElementById('stockIdForCustomer').value
+)">Stok Atama</button>
