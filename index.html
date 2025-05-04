@@ -424,3 +424,33 @@
                 </div>
 
                 <div class="mb-6 p-4 border roun
+<console.log()
+                    function yeniMusteriEkle() {
+  console.log("yeniMusteriEkle fonksiyonu başladı."); // Fonksiyon çalışıyor mu?
+  var musteriAdi = document.getElementById('musteriAdiInput').value;
+  var musteriTel = document.getElementById('musteriTelInput').value;
+  console.log("Müşteri Adı:", musteriAdi); // Değerler doğru alınıyor mu?
+  console.log("Müşteri Tel:", musteriTel);
+
+  var musteriData = {
+    ad: musteriAdi,
+    telefon: musteriTel,
+    eklenmeTarihi: new Date().toString()
+  };
+  console.log("Gönderilecek Veri:", musteriData); // Gönderilecek obje doğru mu?
+
+  var databaseRef = firebase.database().ref('musteriler');
+  console.log("Veritabanı Referansı:", databaseRef.toString()); // Referans doğru mu?
+
+  databaseRef.push(musteriData)
+    .then(function() {
+      console.log("Veri başarıyla eklendi!");
+      // Başarı mesajı veya form temizleme işlemleri
+    })
+    .catch(function(error) {
+      console.error("Veri eklenirken hata oluştu:", error); // Hata burada mı oluşuyor?
+      // Hata mesajı göster
+    });
+
+   console.log("yeniMusteriEkle fonksiyonu bitti.");
+}
