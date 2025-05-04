@@ -1,102 +1,191 @@
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Su Arıtma Takip Sistemi</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.9.3/firebase-database.js"></script>
+    <!-- CSS -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .section {
+            width: 48%;
+            border: 1px solid #ccc;
+            padding: 20px;
+        }
+        h3 {
+            margin-bottom: 10px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Müşteri Yönetimi -->
+        <div class="section">
+            <h3>Müşteri Ekle</h3>
+            <input type="text" id="customerName" placeholder="Müşteri Adı" required>
+            <input type="text" id="customerAddress" placeholder="Müşteri Adresi" required>
+            <input type="text" id="customerPhone" placeholder="Müşteri Telefon" required>
+            <button onclick="addCustomer()">Müşteri Ekle</button>
 
-// Firebase yapılandırma
-const firebaseConfig = {
-    apiKey: "AIzaSyAmW3qdlm49cvfVeP27DaAMGJwtKDJ6kyI",
-    authDomain: "prestij-water.firebaseapp.com",
-    databaseURL: "https://prestij-water-default-rtdb.firebaseio.com",
-    projectId: "prestij-water",
-    storageBucket: "prestij-water.firebasestorage.app",
-    messagingSenderId: "712467125722",
-    appId: "1:712467125722:web:e845679e5d456fda2f5ce3",
-    measurementId: "G-G0ZYR03RVL"
-};
+            <h3>Müşterileri Görüntüle</h3>
+            <ul id="customerList"></ul>
+        </div>
 
-// Firebase'i başlat
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-// Müşteri ekleme fonksiyonu
-function addCustomer(name, address, phone) {
-    const customerRef = firebase.database().ref('customers');
-    const newCustomerRef = customerRef.push();
-    newCustomerRef.set({
-        name: name,
-        address: address,
-        phone: phone,
-        maintenanceHistory: [],
-        installationHistory: [],
-        repairHistory: []
-    });
-}
-// Müşteri düzenleme fonksiyonu
-function updateCustomer(customerId, updatedData) {
-    const customerRef = firebase.database().ref('customers/' + customerId);
-    customerRef.update(updatedData);
-}
-// Müşteri silme fonksiyonu
-function deleteCustomer(customerId) {
-    const customerRef = firebase.database().ref('customers/' + customerId);
-    customerRef.remove();
-}
-// Stok ekleme fonksiyonu
-function addStockItem(name, quantity, criticalStock) {
-    const stockRef = firebase.database().ref('stock');
-    const newStockRef = stockRef.push();
-    newStockRef.set({
-        name: name,
-        quantity: quantity,
-        criticalStock: criticalStock
-    });
-}
-// Stok güncelleme fonksiyonu
-function updateStockItem(stockId, updatedData) {
-    const stockRef = firebase.database().ref('stock/' + stockId);
-    stockRef.update(updatedData);
-}
-// Stok silme fonksiyonu
-function deleteStockItem(stockId) {
-    const stockRef = firebase.database().ref('stock/' + stockId);
-    stockRef.remove();
-}
-// Müşteriye stok atama fonksiyonu
-function assignStockToCustomer(customerId, stockId) {
-    const customerRef = firebase.database().ref('customers/' + customerId + '/assignedStock');
-    customerRef.push(stockId);
-}
-<!-- Müşteri Ekleme -->
-<h3>Müşteri Ekle</h3>
-<input type="text" id="customerName" placeholder="Müşteri Adı" required>
-<input type="text" id="customerAddress" placeholder="Müşteri Adresi" required>
-<input type="text" id="customerPhone" placeholder="Müşteri Telefon" required>
-<button onclick="addCustomer(
-    document.getElementById('customerName').value,
-    document.getElementById('customerAddress').value,
-    document.getElementById('customerPhone').value
-)">Müşteri Ekle</button>
-<!-- Stok Ekleme -->
-<h3>Stok Ekle</h3>
-<input type="text" id="stockName" placeholder="Ürün Adı" required>
-<input type="number" id="stockQuantity" placeholder="Miktar" required>
-<input type="number" id="criticalStock" placeholder="Kritik Stok" required>
-<button onclick="addStockItem(
-    document.getElementById('stockName').value,
-    document.getElementById('stockQuantity').value,
-    document.getElementById('criticalStock').value
-)">Stok Ekle</button>
-<!-- Müşteriye Stok Atama -->
-<h3>Stok Atama</h3>
-<input type="text" id="customerIdForStock" placeholder="Müşteri ID">
-<input type="text" id="stockIdForCustomer" placeholder="Stok ID">
-<button onclick="assignStockToCustomer(
-    document.getElementById('customerIdForStock').value,
-    document.getElementById('stockIdForCustomer').value
-)">Stok Atama</button>
-<!-- Müşteriye Stok Atama -->
-<h3>Stok Atama</h3>
-<input type="text" id="customerIdForStock" placeholder="Müşteri ID">
-<input type="text" id="stockIdForCustomer" placeholder="Stok ID">
-<button onclick="assignStockToCustomer(
-    document.getElementById('customerIdForStock').value,
-    document.getElementById('stockIdForCustomer').value
-)">Stok Atama</button>
+        <!-- Stok Yönetimi -->
+        <div class="section">
+            <h3>Stok Ekle</h3>
+            <input type="text" id="stockName" placeholder="Ürün Adı" required>
+            <input type="number" id="stockQuantity" placeholder="Miktar" required>
+            <input type="number" id="criticalStock" placeholder="Kritik Stok" required>
+            <button onclick="addStockItem()">Stok Ekle</button>
+
+            <h3>Stokları Görüntüle</h3>
+            <ul id="stockList"></ul>
+
+            <h3>Stok Atama</h3>
+            <input type="text" id="customerIdForStock" placeholder="Müşteri ID">
+            <input type="text" id="stockIdForCustomer" placeholder="Stok ID">
+            <button onclick="assignStockToCustomer()">Stok Atama</button>
+        </div>
+    </div>
+
+    <!-- Firebase Yapılandırması ve Fonksiyonlar -->
+    <script>
+        // Firebase yapılandırma
+        const firebaseConfig = {
+            apiKey: "AIzaSyAmW3qdlm49cvfVeP27DaAMGJwtKDJ6kyI",
+            authDomain: "prestij-water.firebaseapp.com",
+            databaseURL: "https://prestij-water-default-rtdb.firebaseio.com",
+            projectId: "prestij-water",
+            storageBucket: "prestij-water.firebasestorage.app",
+            messagingSenderId: "712467125722",
+            appId: "1:712467125722:web:e845679e5d456fda2f5ce3",
+            measurementId: "G-G0ZYR03RVL"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Müşteri Ekleme Fonksiyonu
+        function addCustomer() {
+            const name = document.getElementById('customerName').value;
+            const address = document.getElementById('customerAddress').value;
+            const phone = document.getElementById('customerPhone').value;
+
+            const customerRef = db.ref('customers');
+            const newCustomerRef = customerRef.push();
+            newCustomerRef.set({
+                name: name,
+                address: address,
+                phone: phone,
+                maintenanceHistory: [],
+                installationHistory: [],
+                repairHistory: []
+            });
+
+            alert('Müşteri eklendi');
+            fetchCustomers(); // Müşterileri güncelle
+        }
+
+        // Müşteri Listesini Görüntüleme
+        function fetchCustomers() {
+            const customerRef = db.ref('customers');
+            customerRef.on('value', (snapshot) => {
+                const customers = snapshot.val();
+                const customerList = document.getElementById('customerList');
+                customerList.innerHTML = '';
+
+                for (const customerId in customers) {
+                    const customer = customers[customerId];
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Adı: ${customer.name}, Telefon: ${customer.phone}`;
+                    customerList.appendChild(listItem);
+                }
+            });
+        }
+
+        // Stok Ekleme Fonksiyonu
+        function addStockItem() {
+            const name = document.getElementById('stockName').value;
+            const quantity = document.getElementById('stockQuantity').value;
+            const criticalStock = document.getElementById('criticalStock').value;
+
+            const stockRef = db.ref('stock');
+            const newStockRef = stockRef.push();
+            newStockRef.set({
+                name: name,
+                quantity: quantity,
+                criticalStock: criticalStock
+            });
+
+            alert('Stok eklendi');
+            fetchStockItems(); // Stokları güncelle
+        }
+
+        // Stok Listesini Görüntüleme
+        function fetchStockItems() {
+            const stockRef = db.ref('stock');
+            stockRef.on('value', (snapshot) => {
+                const stockItems = snapshot.val();
+                const stockList = document.getElementById('stockList');
+                stockList.innerHTML = '';
+
+                for (const stockId in stockItems) {
+                    const stock = stockItems[stockId];
+                    const listItem = document.createElement('li');
+                    listItem.textContent = `Ürün: ${stock.name}, Miktar: ${stock.quantity}`;
+                    stockList.appendChild(listItem);
+                }
+            });
+        }
+
+        // Müşteriye Stok Atama Fonksiyonu
+        function assignStockToCustomer() {
+            const customerId = document.getElementById('customerIdForStock').value;
+            const stockId = document.getElementById('stockIdForCustomer').value;
+
+            const customerRef = db.ref('customers/' + customerId + '/assignedStock');
+            customerRef.push(stockId);
+
+            alert('Stok müşteriyle ilişkilendirildi');
+        }
+
+        // Sayfa yüklendiğinde verileri al
+        window.onload = function() {
+            fetchCustomers();
+            fetchStockItems();
+        };
+    </script>
+</body>
+</html>
