@@ -364,7 +364,7 @@
     </div>
 
 
-    <script type="module"> // Ana script bloğu type="module" olarak değiştirildi ve Firebase başlatma kodu başa alındı
+    <script type="module">
         // Firebase SDK importları
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, setDoc, addDoc, updateDoc, deleteDoc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -373,9 +373,9 @@
         const firebaseConfig = {
             apiKey: "AIzaSyAmW3qdlm49cvfVeP27DaAMGJwtKDJ6kyI",
             authDomain: "prestij-water.firebaseapp.com",
-            databaseURL: "https://prestij-water-default-rtdb.firebaseio.com",
+            // databaseURL: "https://prestij-water-default-rtdb.firebaseio.com", // Firestore için gereksiz, kaldırıldı.
             projectId: "prestij-water",
-            storageBucket: "prestij-water.appspot.com",
+            storageBucket: "prestij-water.firebasestorage.app", // Orijinal değerinize geri döndürüldü.
             messagingSenderId: "712467125722",
             appId: "1:712467125722:web:e845679e5d456fda2f5ce3",
             measurementId: "G-G0ZYR03RVL"
